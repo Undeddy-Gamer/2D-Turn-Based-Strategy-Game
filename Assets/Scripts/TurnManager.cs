@@ -5,52 +5,47 @@ using UnityEngine.UI;
 
 public class TurnManager : MonoBehaviour
 {
-    public int turnNumber = 0;
+    public int turnNumber = 1;
     public Text turnText;
-   // public static bool endOfPlayerTurn;
-   // public static bool endOfEnemyTurn;
+
     public static float TurnEnds = 1;
     public static bool PlayerTurn;
     public Image button;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled)
+            PlayerTurn = true;
+        else
+            PlayerTurn = false;
     }
     
     public void NextTurn()
     {
-        if (PlayerTurn == true)
-        {
-            PlayerTurn = false;
-            
-        }
-        else
-        {
-            PlayerTurn = true;
-        }
+        Debug.Log("END TURN CLICKED");        
+
         turnNumber += 1;
         TurnEnds += 1;
 
+        //UnitManager manages player turn bool
         UnitManager.SelectNextUnit();
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-        if (PlayerTurn == true)
-        {
+        if (PlayerTurn)
             button.color = Color.blue;
-        }
-        else
-        {
+        else        
             button.color = Color.red;
-        }
-        turnText.text = " " + turnNumber;
-        if (TurnEnds >= 0)
-        {
-            TurnEnds -= Time.deltaTime;
 
-        }
+        turnText.text = "Turn: " + turnNumber;
+
+        // Eddie asks What is this for below?        
+        //if (TurnEnds >= 0)
+        //{
+        //    TurnEnds -= Time.deltaTime;
+        //}
     }
 }

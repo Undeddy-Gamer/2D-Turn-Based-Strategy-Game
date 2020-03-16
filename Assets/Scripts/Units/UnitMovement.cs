@@ -5,7 +5,6 @@ using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 
-
 public class UnitMovement : MonoBehaviour
 {
 
@@ -33,7 +32,7 @@ public class UnitMovement : MonoBehaviour
     public int[][] tileMesh;
 
     //how fast the unit trabels over the map visually
-    public float visualMovementSpeed = .5f;
+    public float visualMovementSpeed = .75f;
 
     //Pathfinding
     //Meta defining play here
@@ -57,11 +56,11 @@ public class UnitMovement : MonoBehaviour
 
 
 
-    //Maybe needed if using ray casts not using ray casts atm)
+    //for ray casting on click (only check tile map layer)
     [SerializeField]
     private LayerMask mask;
 
-    // Path Finding Variable
+    // Path Finding Variables
     private Node current;
     private Stack<Vector3Int> path;
     private HashSet<Node> openList;
@@ -82,8 +81,6 @@ public class UnitMovement : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
-
-
                 mousePos = Input.mousePosition;
                 tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
 
@@ -93,6 +90,7 @@ public class UnitMovement : MonoBehaviour
                 if (hit.collider != null)
                 {
 
+                    Debug.Log("HIT");
                     /*
                     *   Calculate pathfinding and apply
                     *
@@ -116,20 +114,21 @@ public class UnitMovement : MonoBehaviour
                 }
             }
         }
-        // if is AI controlled unit's turn and still has action points
-        else if (UnitManager.actionPoints > 0)//AI's turn
+        // else it's an AI controlled unit's turn and if it still has action points
+        else if (UnitManager.actionPoints > 0) //AI's turn
             AIUnitController.CalculateAITurn();
-        // if is AI controlled unit's turn and has no more action points
+        // else if is AI controlled unit's turn and has no more action points
         else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled & UnitManager.actionPoints <= 0) 
-        {            
+        {
             //Initiate next unit turn
+            UnitManager.SelectNextUnit();
         }
         // else wait for player to click end turn button
         
     }
 
 
-    // Function tove unit (gameobject) to tile over time
+    // Function to move unit (gameobject) to tile over time
     public IEnumerator moveOverSeconds(GameObject objectToMove, Vector3Int endTile)
     {
         while (objectToMove.transform.position != tileMap.GetCellCenterWorld(endTile))

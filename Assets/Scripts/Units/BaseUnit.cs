@@ -10,10 +10,11 @@ public class BaseUnit : MonoBehaviour
     public int baseMovementSpeed = 5;
     public int baseAttack = 5;
     public int baseAttackRange = 1;
+    public int baseInitiation = 5;
     public bool canFly = false;
+    
 
     [Space(5), Header("Current Stats")]
-    private float actionPoints = 5;
     public float currentHealth = 5;
 
     [Space(5), Header("Control Variables")]
@@ -21,13 +22,13 @@ public class BaseUnit : MonoBehaviour
     public bool active = false;
     public bool playerControlled = false;
 
-
-    private void FixedUpdate()
+    
+    private void Update()
     {
-        if (TurnManager.TurnEnds >= 0)
-        {
-            actionPoints = 2;
-        }   
+        //if (TurnManager.TurnEnds >= 0)
+        //{
+        //    actionPoints = 2;
+        //}   
         
         if (active)
         {

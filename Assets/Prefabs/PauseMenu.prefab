@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 3105800330834704821}
   - component: {fileID: 3671373096038687026}
   m_Layer: 5
-  m_Name: Button
+  m_Name: EndTurn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -242,8 +242,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 105.5, y: -58.8}
-  m_SizeDelta: {x: 60, y: 30}
+  m_AnchoredPosition: {x: 471, y: -275}
+  m_SizeDelta: {x: 100, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4934822904268651577
 CanvasRenderer:
@@ -324,12 +324,12 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8769016666889054969}
-        m_MethodName: 
+      - m_Target: {fileID: 4824177278466412633}
+        m_MethodName: NextTurn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -617,7 +617,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Turn
+  m_Text: 'End Turn
 
 '
 --- !u!1 &8769016665810089480
@@ -1222,8 +1222,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Pause_menu: {fileID: 8769016666094835936}
+  handle: {fileID: 0}
   Settings_menu: {fileID: 8769016665810089480}
   isPaused: 0
+  Name: {fileID: 0}
+  turn: {fileID: 4824177278466412633}
+  LevelNumber: 0
 --- !u!114 &4824177278466412633
 MonoBehaviour:
   m_ObjectHideFlags: 0

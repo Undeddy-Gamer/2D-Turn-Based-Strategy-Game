@@ -8,7 +8,7 @@ public class UnitManager : MonoBehaviour
     public static int currUnitTurn;
     public static int actionPoints;
 
-    // List of Units on the map, ordered by which one goes first     
+    // List of Units on the map, ordered by which one goes first (initiation)  
     public static List<BaseUnit> gameUnits;
 
     public GameObject gameWorld;
@@ -24,16 +24,31 @@ public class UnitManager : MonoBehaviour
                 //units[i] = unit;
                 //Debug.Log(unit.gameObject.name + " : " + unit.baseAttack);
             }
-
         }
+        
+        // Sort unit turns by their Initiation score ((highest First)
+        gameUnits.Sort(SortByInitiation);
+        
+        // set unit with initial highest initiation to active
         gameUnits[0].active = true;
         currUnitTurn = 0;
 
-        actionPoints =gameUnits[currUnitTurn].baseMovementSpeed;
+        actionPoints = gameUnits[currUnitTurn].baseMovementSpeed;
 
-        Debug.Log("Number of Units: " + gameUnits.Count);
+        //Debug.Log("Number of Units: " + gameUnits.Count);
+
+        //Debug Stuff
+        //foreach (BaseUnit u in gameUnits)
+        //{
+        //    Debug.Log(u.gameObject.name + " : " + u.baseInitiation);
+        //}
     }
 
+    // Algorithim to sort units by initiation
+    static int SortByInitiation(BaseUnit u1, BaseUnit u2)
+    {
+        return u2.baseInitiation.CompareTo(u1.baseInitiation);
+    }
 
     public static void SelectNextUnit()
     {
@@ -49,6 +64,14 @@ public class UnitManager : MonoBehaviour
 
         // set next unit to active
         gameUnits[currUnitTurn].active = true;
+        //update available action points
+        actionPoints = gameUnits[currUnitTurn].baseMovementSpeed;
+        
+        // set player turn in turn manager???
+        if (gameUnits[currUnitTurn].playerControlled)
+            TurnManager.PlayerTurn = true;
+        else
+            TurnManager.PlayerTurn = false;
     }
 
 

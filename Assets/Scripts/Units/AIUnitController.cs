@@ -7,7 +7,7 @@ public class AIUnitController : MonoBehaviour
     BaseUnit unit;
 
     public float moveTimer = .5f;
-
+    public TurnManager turn;
 
     void Start()
     {
@@ -29,8 +29,17 @@ public class AIUnitController : MonoBehaviour
 
     public static void CalculateAITurn()
     {
+        //Testing
         Debug.Log("AI Unit Turn: " + UnitManager.gameUnits[UnitManager.currUnitTurn].name);
-        // Do AI Turn
+        UnitManager.gameUnits[UnitManager.currUnitTurn].active = false;
+        UnitManager.actionPoints++;
 
+        if (UnitManager.actionPoints >= UnitManager.gameUnits[UnitManager.currUnitTurn].baseMovementSpeed)        
+        {
+            UnitManager.SelectNextUnit();
+        }
+
+
+        // Do AI Turn
     }
 }
