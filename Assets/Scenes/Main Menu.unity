@@ -289,6 +289,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 369870592741696517, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 369870592741696517, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 369870592741696517, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1226388811201493113, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -312,7 +327,7 @@ PrefabInstance:
     - target: {fileID: 1226388811201493113, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: NextLevel
+      value: Save
       objectReference: {fileID: 0}
     - target: {fileID: 1226388811201493113, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
         type: 3}
@@ -322,7 +337,7 @@ PrefabInstance:
     - target: {fileID: 1226388811279157633, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
         type: 3}
       propertyPath: m_Text
-      value: Start Game
+      value: Save Game
       objectReference: {fileID: 0}
     - target: {fileID: 1226388811296200919, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
         type: 3}
@@ -432,6 +447,16 @@ PrefabInstance:
     - target: {fileID: 1226388811296200936, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
         type: 3}
       propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6874336754284850660, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6874336754284850660, guid: 16474d03a40bc2a4eb9a5d54c5ebbd2f,
+        type: 3}
+      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

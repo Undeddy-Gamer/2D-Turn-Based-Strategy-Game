@@ -11,6 +11,7 @@ public class Menu : MonoBehaviour
     public Saving handle;
     //set Settings menu as a panel, set inactive
     public GameObject Settings_menu;
+    public GameObject Load_menu;
     //create variable isPaused
     public bool isPaused = false;
     public InputField Name;
@@ -57,17 +58,34 @@ public class Menu : MonoBehaviour
         if (on == true)
         {
             Settings_menu.SetActive(false);
-           
+            Pause_menu.SetActive(true);
             return;
 
         }
         else
         {
             Settings_menu.SetActive(true);
-            
+            Pause_menu.SetActive(false);
             return;
         }
         
+    }
+    public void ToggleLoad(bool on)
+    {
+        if (on == true)
+        {
+            Load_menu.SetActive(false);
+            Pause_menu.SetActive(true);
+            return;
+
+        }
+        else
+        {
+            Load_menu.SetActive(true);
+            Pause_menu.SetActive(false);
+            return;
+        }
+
     }
     public void Restart()
     {
