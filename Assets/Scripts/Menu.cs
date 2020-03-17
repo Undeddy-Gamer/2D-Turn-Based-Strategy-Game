@@ -9,11 +9,13 @@ public class Menu : MonoBehaviour
     //set Pause menu as a panel, set inactive
     public GameObject Pause_menu;
     public Saving handle;
+    
     //set Settings menu as a panel, set inactive
     public GameObject Settings_menu;
     public GameObject Load_menu;
+
     //create variable isPaused
-    public bool isPaused = false;
+    public static bool isPaused = false;
     public InputField Name;
     public TurnManager turn;
     public int LevelNumber;
@@ -36,18 +38,19 @@ public class Menu : MonoBehaviour
 
 
     }
+
     public void TogglePause()
     {
         if (isPaused == true)
         {
-           
+            Time.timeScale = 1;            
             Pause_menu.SetActive(false);
             isPaused = false;
             return;
         }
         else
         {
-            
+            Time.timeScale = 0;            
             Pause_menu.SetActive(true);
             isPaused = true;
             return;

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: HexRock
+  m_Name: UpLeft
   m_EditorClassIdentifier: Assembly-CSharp::ATile
-  m_Sprite: {fileID: 21300000, guid: 842e7e73d6b20af49a0790d90c63303e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 85233ff5581c30e41883c371c2cb1511, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -35,4 +35,4 @@ MonoBehaviour:
   m_Flags: 1
   m_ColliderType: 1
   movementSpeed: 1
-  isWalkable: 0
+  isWalkable: 1
