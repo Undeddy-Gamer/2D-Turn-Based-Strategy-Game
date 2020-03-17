@@ -242,7 +242,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 471, y: -275}
+  m_AnchoredPosition: {x: 112, y: -58}
   m_SizeDelta: {x: 100, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4934822904268651577
@@ -1224,6 +1224,7 @@ MonoBehaviour:
   Pause_menu: {fileID: 8769016666094835936}
   handle: {fileID: 0}
   Settings_menu: {fileID: 8769016665810089480}
+  Load_menu: {fileID: 0}
   isPaused: 0
   Name: {fileID: 0}
   turn: {fileID: 4824177278466412633}
