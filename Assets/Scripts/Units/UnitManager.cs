@@ -15,18 +15,18 @@ public class UnitManager : MonoBehaviour
 
     void Awake()
     {
+
+        //Create a list of all units on the battlefield
         gameUnits = new List<BaseUnit>();
         foreach (BaseUnit unit in gameWorld.GetComponentsInChildren<BaseUnit>())
         {
             if (unit != null)
             { 
                 gameUnits.Add(unit);
-                //units[i] = unit;
-                //Debug.Log(unit.gameObject.name + " : " + unit.baseAttack);
             }
         }
         
-        // Sort unit turns by their Initiation score ((highest First)
+        // Sort unit turns by their Initiation score (highest First)
         gameUnits.Sort(SortByInitiation);
         
         // set unit with initial highest initiation to active
@@ -34,14 +34,7 @@ public class UnitManager : MonoBehaviour
         currUnitTurn = 0;
 
         actionPoints = gameUnits[currUnitTurn].baseMovementSpeed;
-
-        //Debug.Log("Number of Units: " + gameUnits.Count);
-
-        //Debug Stuff
-        //foreach (BaseUnit u in gameUnits)
-        //{
-        //    Debug.Log(u.gameObject.name + " : " + u.baseInitiation);
-        //}
+       
     }
 
     // Algorithim to sort units by initiation

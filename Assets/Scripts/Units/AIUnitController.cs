@@ -4,42 +4,30 @@ using UnityEngine;
 
 public class AIUnitController : MonoBehaviour
 {
-    BaseUnit unit;
-
-    public float moveTimer = .5f;
+       
     public TurnManager turn;
 
-    void Start()
-    {
-        //unit = units[currU]
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (unit.active)
-        {
-            if (!unit.playerControlled)
-            {
-                CalculateAITurn();
-            }
-
-        }
-    }
-
+    bool canAttack = false;
+    
     public static void CalculateAITurn()
     {
-        //Testing
-        Debug.Log("AI Unit Turn: " + UnitManager.gameUnits[UnitManager.currUnitTurn].name);
-        UnitManager.gameUnits[UnitManager.currUnitTurn].active = false;
-        UnitManager.actionPoints++;
+        
+        
+    }
 
-        if (UnitManager.actionPoints >= UnitManager.gameUnits[UnitManager.currUnitTurn].baseMovementSpeed)        
+    public static int GetClosestEnemyUnitPosition()
+    {
+        int unitToAttack = -1;
+
+        for (int i = 0; i < UnitManager.gameUnits.Count - 1; i++)
         {
-            UnitManager.SelectNextUnit();
+            if (UnitManager.gameUnits[i].playerControlled)
+            {
+                unitToAttack = i;
+                //break;
+            }
         }
 
-
-        // Do AI Turn
+        return unitToAttack;
     }
 }

@@ -11,6 +11,7 @@ public class UnitMovement : MonoBehaviour
 {
 
     public Tilemap tileMap;
+    public Tilemap highlightMap;
     public ATile baseTile;
     public ATile pathTile;
 
@@ -59,7 +60,9 @@ public class UnitMovement : MonoBehaviour
 
     private Dictionary<Vector3Int, TileNode> allNodes = new Dictionary<Vector3Int, TileNode>();
 
-
+    private bool unitIsMoving = false;
+    // tells us if the unit is stopped because the next tile costs more AP than it has available
+    private bool cantMoveMore = false;
 
     private void Start()
     {
@@ -74,74 +77,133 @@ public class UnitMovement : MonoBehaviour
         { 
             if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && UnitManager.actionPoints > 0)
             {
+                
+                origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
+                mousePos = Input.mousePosition;
+                tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
+
                 if (Input.GetMouseButtonDown(0))
                 {
-                    origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position );
-                    mousePos = Input.mousePosition;
-                    tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
-
+                    
                     //Thorws a raycast in the direction of the target
                     RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity, mask);
 
                     if (hit.collider != null)
                     {
+                        current = null;
+                        CalculatePath(false);
 
-
-                        /*
-                        *   Calculate pathfinding and apply
-                        *
-                        *   Insert Code Here
-                        *
-                        */
-
-                        Stack<Vector3Int> finaPath = CalculatePath(false);
-
-
-                        // Debugging
-
-                        // Temporary movment code
-                        // jumpt to mouse click
-                        StartCoroutine(moveOverSeconds(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject, tilePos));
-
-                        // get cselected tile 
-                        //ATile aTile = (ATile)tileMap.GetTile(tilePos);
-                        //apply tile movement cost to available action points
-                        //UnitManager.actionPoints -= aTile.movementCost;
-
-                        //GetAdjacentTiles(tilePos);
-
-                        // End Debugging
+                        //Apply movement
+                        StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));                        
+                        
                     }
+                }
+                else
+                {
+                    if (!unitIsMoving)
+                    { 
+                        // Show path unit will take while hovering   
+                        current = null;
+                        highlightMap.ClearAllTiles();
+                        CalculatePath(false);
+                    }
+
                 }
             }
             // else it's an AI controlled unit's turn and if it still has action points
-            else if (UnitManager.actionPoints > 0) //AI's turn
-                AIUnitController.CalculateAITurn();
+            else if (!cantMoveMore) //AI's turn
+            {
+                //origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
+                
+                //If AI cannot attack then
+                    CalculateAIMovement();
+                    highlightMap.ClearAllTiles();
+                    StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
+                    cantMoveMore = false;
+                    UnitManager.SelectNextUnit();
+                //else
+                //AI Unit Attack
+            }                
             // else if is AI controlled unit's turn and has no more action points
-            else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled & UnitManager.actionPoints <= 0) 
+            else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && cantMoveMore) 
             {
                 //Initiate next unit turn
+                cantMoveMore = false;
                 UnitManager.SelectNextUnit();
+                
+                
             }
+            // else wait for player to click end turn button
         }
-        // else wait for player to click end turn button
+
 
     }
+
+
+    #region AIMovement
+
+    private void CalculateAIMovement()
+    {
+        // Do AI Turn
+        Debug.Log("AI Movement : " +  UnitManager.gameUnits[UnitManager.currUnitTurn].name + " : " + AIUnitController.GetClosestEnemyUnitPosition() + " : " + UnitManager.gameUnits.Count);
+        
+        current = null;
+
+        if (!cantMoveMore)
+        {
+            //
+            origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
+            tilePos = tileMap.WorldToCell(UnitManager.gameUnits[AIUnitController.GetClosestEnemyUnitPosition()].transform.position);
+            CalculatePath(false);
+        }
+        else
+            cantMoveMore = false;
+            UnitManager.SelectNextUnit();
+    }
+
+    
+
+    #endregion
 
 
     // Function to move unit (gameobject) to tile over time
-    public IEnumerator moveOverSeconds(GameObject objectToMove, Vector3Int endTile)
-    {
-        while (objectToMove.transform.position != tileMap.GetCellCenterWorld(endTile))
-        {
-            objectToMove.transform.position = Vector3.Lerp(objectToMove.transform.position, tileMap.GetCellCenterWorld(endTile), visualMovementSpeed * Time.deltaTime);
-            yield return new WaitForEndOfFrame();
-        }
+    //public IEnumerator moveOverSeconds(GameObject objectToMove, Vector3Int endTile)
+    //{
+    //    while (objectToMove.transform.position != tileMap.GetCellCenterWorld(endTile))
+    //    {
+    //        objectToMove.transform.position = Vector3.Lerp(objectToMove.transform.position, tileMap.GetCellCenterWorld(endTile), visualMovementSpeed * Time.deltaTime);
+    //        yield return new WaitForEndOfFrame();
+    //    }
 
+    //}
+
+    public IEnumerator moveViaPath(GameObject objectToMove)
+    {
+        unitIsMoving = true;
+
+        foreach (Vector3Int position in path)
+        {
+            if (UnitManager.actionPoints < ((ATile)tileMap.GetTile(position)).movementCost)
+            {
+                cantMoveMore = true;
+                unitIsMoving = false;
+                break;
+            }
+            
+            while (objectToMove.transform.position != tileMap.GetCellCenterWorld(position))
+            {
+                objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, tileMap.GetCellCenterWorld(position), visualMovementSpeed * Time.deltaTime);
+                yield return new WaitForEndOfFrame();
+            }
+            UnitManager.actionPoints -= ((ATile)tileMap.GetTile(position)).movementCost;
+
+
+            yield return new WaitForSeconds(.1f);
+        }
+        unitIsMoving = false;
     }
 
-
-    // Path Finding Code
+        // Path Finding Code
 
     #region PathFinding
 
@@ -167,7 +229,7 @@ public class UnitMovement : MonoBehaviour
     }
 
 
-    public Stack<Vector3Int> CalculatePath(bool step)
+    public void CalculatePath(bool step)
     {
         if (current == null)
         {
@@ -177,11 +239,8 @@ public class UnitMovement : MonoBehaviour
         while (openList.Count > 0 && path == null)
         {
             List<TileNode> neighbours = FindNeighbours(current.Position);
-
             ExamineNeighbours(neighbours, current);
-
             UpdateCurrentTile(ref current);
-
             path = GeneratePath(current);
 
             if (step)
@@ -194,47 +253,32 @@ public class UnitMovement : MonoBehaviour
         // show path on map (debugging)
         if (path != null)
         {
+            int tempAP = UnitManager.actionPoints;
+            
             foreach (Vector3Int position in path)
             {
-                //if (position != tilePos)
-                //{
-                tileMap.SetTile(position, baseTile);
-                //}
-                int nextTileMoveCost = ((ATile)tileMap.GetTile(current.Position)).movementCost;
-
-                if (UnitManager.actionPoints <= nextTileMoveCost)
-                {
-                    UnitManager.actionPoints -= ((ATile)tileMap.GetTile(current.Position)).movementCost;
-                    if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled)
-                    {
-                        UnitManager.SelectNextUnit();
-                    } // otherwise wait for player to hit End Turn button;
+                int nextTileMoveCost = ((ATile)tileMap.GetTile(position)).movementCost;
+                tempAP -= nextTileMoveCost;
+                //Debug.Log("AP Available: " + tempAP);
+                
+                highlightMap.SetTile(position, pathTile);
+                
+                
+                if (tempAP < nextTileMoveCost)
+                {                    
+                    break;
                 }
-                //Apply unit movement
-
             }
-            tileMap.SetTile(origPos, baseTile);
-            return path;
-            //tileMap.SetTile(tilePos, baseTile);
+
+            //highlightMap.SetTile(tilePos, pathTile);
 
         }
-        else return null;
+        //else return null;
 
 
     }
 
 
-    // get neigbour tiles debug test
-    //void GetAdjacentTiles(Vector3Int tilePosition)
-    //{
-    //    List<TileNode> neighbours = FindNeighbours(tilePosition);
-
-    //    foreach (TileNode n in neighbours)
-    //    {
-    //        //Debug check
-    //       tileMap.SetTile(n.Position, baseTile);
-    //    }
-    //}
 
 
     
@@ -348,17 +392,11 @@ public class UnitMovement : MonoBehaviour
     {
         for (int i = 0; i < neighbours.Count; i++)
         {
-            TileNode neighbour = neighbours[i];
-
-            //if (!ConnectedDiagonally(current, neighbour))
-            //{
-            //    continue;
-            //}
-
-            current.G = 10;
+            TileNode neighbour = neighbours[i];            
 
             int gScore = ((ATile)tileMap.GetTile(neighbour.Position)).movementCost;
 
+            // Take an Educated guess which will be the fastest way to goal
             if (openList.Contains(neighbour))
             {
                 if (current.G + gScore < neighbour.G)
@@ -393,26 +431,6 @@ public class UnitMovement : MonoBehaviour
     }
 
 
-    //Don't need this it will be the same for all neighbours
-    //private int DetermineGScore(Vector3Int neighbour, Vector3Int current)
-    //{
-    //    int gScore = 0;
-
-    //    int x = current.x - neighbour.x;
-    //    int y = current.y - neighbour.y;
-
-    //    if (Mathf.Abs(x - y) % 2 == 1)
-    //    {
-    //        gScore = 10; //The gscore for a vertical or horizontal node is 10
-    //    }
-    //    else
-    //    {
-    //        gScore = 14;
-    //    }
-
-    //    return gScore;
-    //}
-
 
     private Stack<Vector3Int> GeneratePath(TileNode current)
     {
@@ -421,16 +439,13 @@ public class UnitMovement : MonoBehaviour
             //Creates a stack to contain the final path
             Stack<Vector3Int> finalPath = new Stack<Vector3Int>();
 
-            //Add the nodes to the final path
+            //Add the nodes to a final path list
             while (current.Position != origPos )
-            {
-                
-                    //Adds the current node to the final path
+            {       
+                    //add the current Node to the path stack
                     finalPath.Push(current.Position);
-                    //Find the parent of the node, this is actually retracing the whole path back to start
-                    //By doing so, we will end up with a complete path.
-                    current = current.Parent;                                
-                    
+                    //set the current node to the parent node, whis will retrace the steps back to original position and create the final path
+                    current = current.Parent;  
             }
 
             //Returns the complete path
@@ -441,18 +456,15 @@ public class UnitMovement : MonoBehaviour
     }
 
 
-    //Calculates teh values we will use to (as efficiently as possible) guess the next nodes to check
+    //Calculates teh values we will use to (as efficiently as possible) guess and check the next nodes to check
     private void CalcValues(TileNode parent, TileNode neighbour, int cost)
     {
         //Sets the parent node
         neighbour.Parent = parent;
-
         //Calculates this nodes g cost, The parents g cost + what it costs to move tot his node
         neighbour.G = parent.G + cost;
-
         //H is calucalted, it's the distance from this node to the goal * 10
         neighbour.H = ((Math.Abs((neighbour.Position.x - tilePos.x)) + Math.Abs((neighbour.Position.y - tilePos.y))) * 10);
-
         //F is calcualted 
         neighbour.F = neighbour.G + neighbour.H;
     }
@@ -467,6 +479,7 @@ public class UnitMovement : MonoBehaviour
         else
         {
             TileNode node = new TileNode(position);
+            node.G = 5;
             allNodes.Add(position, node);
             return node;
         }
