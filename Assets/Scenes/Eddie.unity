@@ -184,21 +184,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileMap: {fileID: 1134439285}
   baseTile: {fileID: 11400000, guid: 5dcf43fbb639ee243b46887bccbb3fc2, type: 2}
-  dlTile: {fileID: 11400000, guid: 0613235277980894697004b75b03cd0b, type: 2}
-  drTile: {fileID: 11400000, guid: 5aceef36df647bb4c9407b4cc89a4950, type: 2}
-  ulTile: {fileID: 11400000, guid: 677464a7ae4b5eb40bd34befd0ced178, type: 2}
-  urTile: {fileID: 11400000, guid: 601a0ea1e3f283741afea0504e1f1e73, type: 2}
-  rTile: {fileID: 11400000, guid: e8c87a365e9f50f4ea1361692183618a, type: 2}
-  lTile: {fileID: 11400000, guid: 9f50970ccc817a44baa197c9f0a9afa7, type: 2}
+  pathTile: {fileID: 0}
   origPos: {x: 0, y: 0, z: 0}
   mousePos: {x: 0, y: 0, z: 0}
   tilePos: {x: 0, y: 0, z: 0}
-  tileLeft: {x: 0, y: 0, z: 0}
-  tileUpLeft: {x: 0, y: 0, z: 0}
-  tileDownLeft: {x: 0, y: 0, z: 0}
-  tileRight: {x: 0, y: 0, z: 0}
-  tileUpRight: {x: 0, y: 0, z: 0}
-  tileDownRight: {x: 0, y: 0, z: 0}
   visualMovementSpeed: 2
   teamNum: 0
   mask:
@@ -497,7 +486,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 512986601}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8, y: 0, z: 0}
+  m_LocalPosition: {x: -2, y: 4.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 66315754}
@@ -516,7 +505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseHealth: 5
-  baseMovementSpeed: 5
+  baseMovementSpeed: 20
   baseAttack: 5
   baseAttackRange: 1
   baseInitiation: 4

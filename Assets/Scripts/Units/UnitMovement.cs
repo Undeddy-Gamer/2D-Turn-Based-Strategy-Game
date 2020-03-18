@@ -12,13 +12,14 @@ public class UnitMovement : MonoBehaviour
 
     public Tilemap tileMap;
     public ATile baseTile;
+    public ATile pathTile;
 
-    public ATile dlTile;
-    public ATile drTile;
-    public ATile ulTile;
-    public ATile urTile;
-    public ATile rTile;
-    public ATile lTile;
+    //public ATile dlTile;
+    //public ATile drTile;
+    //public ATile ulTile;
+    //public ATile urTile;
+    //public ATile rTile;
+    //public ATile lTile;
 
     //change back to private after debugging complete
     // original unit position
@@ -28,19 +29,7 @@ public class UnitMovement : MonoBehaviour
     // goal tile position
     public Vector3Int tilePos;
 
-
     
-    // positions of adjacent tile to the current unit tile 
-    public Vector3Int tileLeft;
-    public Vector3Int tileUpLeft;
-    public Vector3Int tileDownLeft;
-    public Vector3Int tileRight;
-    public Vector3Int tileUpRight;
-    public Vector3Int tileDownRight;
-
-    // remember to change back to private
-    //public int[][] tileMesh;
-
     //how fast the unit trabels over the map visually
     public float visualMovementSpeed = .75f;
 
@@ -74,7 +63,7 @@ public class UnitMovement : MonoBehaviour
 
     private void Start()
     {
-        //origPos = 
+        
     }
 
 
@@ -87,6 +76,7 @@ public class UnitMovement : MonoBehaviour
             {
                 if (Input.GetMouseButtonDown(0))
                 {
+                    origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position );
                     mousePos = Input.mousePosition;
                     tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
 
@@ -96,8 +86,7 @@ public class UnitMovement : MonoBehaviour
                     if (hit.collider != null)
                     {
 
-                        Debug.Log("HIT: " + hit.point);
-                        Debug.Log("Click: " + tilePos);
+
                         /*
                         *   Calculate pathfinding and apply
                         *
@@ -105,8 +94,7 @@ public class UnitMovement : MonoBehaviour
                         *
                         */
 
-                        //Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                        //Vector3Int clickPos = tileMap.WorldToCell(mouseWorldPos);
+                        Stack<Vector3Int> finaPath = CalculatePath(false);
 
 
                         // Debugging
@@ -116,11 +104,11 @@ public class UnitMovement : MonoBehaviour
                         StartCoroutine(moveOverSeconds(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject, tilePos));
 
                         // get cselected tile 
-                        ATile aTile = (ATile)tileMap.GetTile(tilePos);
+                        //ATile aTile = (ATile)tileMap.GetTile(tilePos);
                         //apply tile movement cost to available action points
-                        UnitManager.actionPoints -= aTile.movementSpeed;
-                                               
-                        GetAdjacentTiles(tilePos);
+                        //UnitManager.actionPoints -= aTile.movementCost;
+
+                        //GetAdjacentTiles(tilePos);
 
                         // End Debugging
                     }
@@ -158,24 +146,6 @@ public class UnitMovement : MonoBehaviour
     #region PathFinding
 
 
-
-
-
-    // get neigbour tiles test
-    void GetAdjacentTiles(Vector3Int tilePosition)
-    {
-        List<TileNode> neighbours = FindNeighbours(tilePosition);
-
-        foreach (TileNode n in neighbours)
-        {
-           tileMap.SetTile(n.Position, baseTile);
-        }
-
-
-    }
-
-
-
     private void Initialize()
     {
         // get  the original start position node
@@ -197,17 +167,90 @@ public class UnitMovement : MonoBehaviour
     }
 
 
-    
+    public Stack<Vector3Int> CalculatePath(bool step)
+    {
+        if (current == null)
+        {
+            Initialize();
+        }
 
+        while (openList.Count > 0 && path == null)
+        {
+            List<TileNode> neighbours = FindNeighbours(current.Position);
+
+            ExamineNeighbours(neighbours, current);
+
+            UpdateCurrentTile(ref current);
+
+            path = GeneratePath(current);
+
+            if (step)
+            {
+                break;
+            }
+        }
+
+
+        // show path on map (debugging)
+        if (path != null)
+        {
+            foreach (Vector3Int position in path)
+            {
+                //if (position != tilePos)
+                //{
+                tileMap.SetTile(position, baseTile);
+                //}
+                int nextTileMoveCost = ((ATile)tileMap.GetTile(current.Position)).movementCost;
+
+                if (UnitManager.actionPoints <= nextTileMoveCost)
+                {
+                    UnitManager.actionPoints -= ((ATile)tileMap.GetTile(current.Position)).movementCost;
+                    if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled)
+                    {
+                        UnitManager.SelectNextUnit();
+                    } // otherwise wait for player to hit End Turn button;
+                }
+                //Apply unit movement
+
+            }
+            tileMap.SetTile(origPos, baseTile);
+            return path;
+            //tileMap.SetTile(tilePos, baseTile);
+
+        }
+        else return null;
+
+
+    }
+
+
+    // get neigbour tiles debug test
+    //void GetAdjacentTiles(Vector3Int tilePosition)
+    //{
+    //    List<TileNode> neighbours = FindNeighbours(tilePosition);
+
+    //    foreach (TileNode n in neighbours)
+    //    {
+    //        //Debug check
+    //       tileMap.SetTile(n.Position, baseTile);
+    //    }
+    //}
+
+
+    
     private List<TileNode> FindNeighbours(Vector3Int tilePosition)
     {
         List<TileNode> neighbours = new List<TileNode>();
-
         //'Lazy' add neigbours tiles to list, this will not work universally and is dependant on the tiles being the pre-determined size
 
 
         // an offset used to correct the position of the bottom and top tiles when the selected position is an odd number, required to do this due to being a Hexagon grid
-        int hexTileOffset = tilePosition.y % 2;
+        int hexTileOffset = 0;
+        if (!(tilePosition.y % 2 == 0))
+        {
+            hexTileOffset = 1;
+        }
+
         ATile tempTile;
         
 
@@ -301,6 +344,40 @@ public class UnitMovement : MonoBehaviour
         return neighbours;
     }
 
+    private void ExamineNeighbours(List<TileNode> neighbours, TileNode current)
+    {
+        for (int i = 0; i < neighbours.Count; i++)
+        {
+            TileNode neighbour = neighbours[i];
+
+            //if (!ConnectedDiagonally(current, neighbour))
+            //{
+            //    continue;
+            //}
+
+            current.G = 10;
+
+            int gScore = ((ATile)tileMap.GetTile(neighbour.Position)).movementCost;
+
+            if (openList.Contains(neighbour))
+            {
+                if (current.G + gScore < neighbour.G)
+                {
+                    CalcValues(current, neighbour, gScore);
+                }
+            }
+            else if (!closedList.Contains(neighbour))
+            {
+                CalcValues(current, neighbour, gScore);
+
+                if (!openList.Contains(neighbour)) //An extra check for openlist containing the neigbour
+                {
+                    openList.Add(neighbour); //Then we need to add the node to the openlist
+                }
+            }
+        }
+    }
+
     private void UpdateCurrentTile(ref TileNode current)
     {
         //The current node is removed fromt he open list
@@ -345,13 +422,15 @@ public class UnitMovement : MonoBehaviour
             Stack<Vector3Int> finalPath = new Stack<Vector3Int>();
 
             //Add the nodes to the final path
-            while (current.Position != origPos)
+            while (current.Position != origPos )
             {
-                //Adds the current node to the final path
-                finalPath.Push(current.Position);
-                //Find the parent of the node, this is actually retracing the whole path back to start
-                //By doing so, we will end up with a complete path.
-                current = current.Parent;
+                
+                    //Adds the current node to the final path
+                    finalPath.Push(current.Position);
+                    //Find the parent of the node, this is actually retracing the whole path back to start
+                    //By doing so, we will end up with a complete path.
+                    current = current.Parent;                                
+                    
             }
 
             //Returns the complete path
