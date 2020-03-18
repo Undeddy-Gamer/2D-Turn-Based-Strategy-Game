@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class TurnManager : MonoBehaviour
 {
     public int turnNumber = 1;
+    public string whosTurnIsitAnyway;
     public Text turnText;
 
     public static float TurnEnds = 1;
@@ -30,6 +31,7 @@ public class TurnManager : MonoBehaviour
 
         //UnitManager manages player turn bool
         UnitManager.SelectNextUnit();
+        
     }
 
 
@@ -40,8 +42,15 @@ public class TurnManager : MonoBehaviour
         else        
             button.color = Color.red;
 
-        turnText.text = "Turn: " + turnNumber;
-
+        turnText.text = "Turn: " + turnNumber + " " + whosTurnIsitAnyway;
+        if(PlayerTurn)
+        {
+            whosTurnIsitAnyway = "Player";
+        }
+        else
+        {
+            whosTurnIsitAnyway = "Enemy";
+        }
         // Eddie asks What is this for below?        
         //if (TurnEnds >= 0)
         //{
