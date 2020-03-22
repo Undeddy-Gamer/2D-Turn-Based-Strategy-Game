@@ -15,6 +15,8 @@ public class UnitMovement : MonoBehaviour
     public ATile baseTile;
     public ATile pathTile;
 
+    //UnitManager unitManager 
+
     //public ATile dlTile;
     //public ATile drTile;
     //public ATile ulTile;
@@ -37,7 +39,7 @@ public class UnitMovement : MonoBehaviour
     //Pathfinding
     //Meta defining play here
 
-    public int teamNum;
+    //public int teamNum;
     //public int x;
     //public int y;
     
@@ -60,9 +62,9 @@ public class UnitMovement : MonoBehaviour
 
     private Dictionary<Vector3Int, TileNode> allNodes = new Dictionary<Vector3Int, TileNode>();
 
-    private bool unitIsMoving = false;
+    public bool unitIsMoving = false;
     // tells us if the unit is stopped because the next tile costs more AP than it has available
-    private bool cantMoveMore = false;
+    public bool cantMoveMore = false;
 
     private void Start()
     {
@@ -74,15 +76,16 @@ public class UnitMovement : MonoBehaviour
     {
 
         if (!Menu.isPaused)
-        { 
+        {            
             if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && UnitManager.actionPoints > 0)
             {
+                cantMoveMore = false;
                 
                 origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
                 mousePos = Input.mousePosition;
                 tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
 
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && !unitIsMoving)
                 {
                     
                     //Thorws a raycast in the direction of the target
@@ -98,41 +101,49 @@ public class UnitMovement : MonoBehaviour
                         
                     }
                 }
-                else
+                else if (!unitIsMoving)
                 {
-                    if (!unitIsMoving)
-                    { 
-                        // Show path unit will take while hovering   
-                        current = null;
-                        highlightMap.ClearAllTiles();
-                        CalculatePath(false);
-                    }
-
+                    // Show path unit will take while hovering
+                    current = null;
+                    highlightMap.ClearAllTiles();
+                    CalculatePath(false);
                 }
             }
-            // else it's an AI controlled unit's turn and if it still has action points
-            else if (!cantMoveMore) //AI's turn
+            // else if it's an AI controlled unit's turn
+            else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled) 
             {
-                //origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
+                // Do AI Turn
+
                 
-                //If AI cannot attack then
-                    CalculateAIMovement();
-                    highlightMap.ClearAllTiles();
-                    StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
-                    cantMoveMore = false;
-                    UnitManager.SelectNextUnit();
+
+                // If AI cannot attack then
+                Debug.Log("AI Unit ID : " + UnitManager.currUnitTurn);
+                Debug.Log("AI Unit Name : " + UnitManager.gameUnits[UnitManager.currUnitTurn].name);
+                Debug.Log("Action Points: " + UnitManager.actionPoints);
+                Debug.Log("Closests Enemy Position ID : " + AIUnitController.GetClosestEnemyUnitPosition());
+                Debug.Log("Unit Count: " + UnitManager.gameUnits.Count);
+               
+                //Clear any higlighted tiles
+                highlightMap.ClearAllTiles();
+                //Calculate AI movement
+                CalculateAIMovement();                    
+                StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
+
+                
+                //UnitManager.SelectNextUnit();
+                //cantMoveMore = false;
+
+
                 //else
                 //AI Unit Attack
             }                
-            // else if is AI controlled unit's turn and has no more action points
-            else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && cantMoveMore) 
-            {
-                //Initiate next unit turn
-                cantMoveMore = false;
-                UnitManager.SelectNextUnit();
-                
-                
-            }
+            //// else if is AI controlled unit's turn and has no more action points
+            //else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && cantMoveMore) 
+            //{
+            //    //Initiate next unit turn
+            //    cantMoveMore = false;
+            //    UnitManager.SelectNextUnit();
+            //}
             // else wait for player to click end turn button
         }
 
@@ -143,17 +154,13 @@ public class UnitMovement : MonoBehaviour
     #region AIMovement
 
     private void CalculateAIMovement()
-    {
-        // Do AI Turn
-        Debug.Log("AI Movement : " +  UnitManager.gameUnits[UnitManager.currUnitTurn].name + " : " + AIUnitController.GetClosestEnemyUnitPosition() + " : " + UnitManager.gameUnits.Count);
-        
-        current = null;
-
+    {        
         if (!cantMoveMore)
         {
             //
             origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
             tilePos = tileMap.WorldToCell(UnitManager.gameUnits[AIUnitController.GetClosestEnemyUnitPosition()].transform.position);
+            current = null;
             CalculatePath(false);
         }
         else
@@ -166,40 +173,36 @@ public class UnitMovement : MonoBehaviour
     #endregion
 
 
-    // Function to move unit (gameobject) to tile over time
-    //public IEnumerator moveOverSeconds(GameObject objectToMove, Vector3Int endTile)
-    //{
-    //    while (objectToMove.transform.position != tileMap.GetCellCenterWorld(endTile))
-    //    {
-    //        objectToMove.transform.position = Vector3.Lerp(objectToMove.transform.position, tileMap.GetCellCenterWorld(endTile), visualMovementSpeed * Time.deltaTime);
-    //        yield return new WaitForEndOfFrame();
-    //    }
-
-    //}
 
     public IEnumerator moveViaPath(GameObject objectToMove)
     {
         unitIsMoving = true;
 
         foreach (Vector3Int position in path)
-        {
-            if (UnitManager.actionPoints < ((ATile)tileMap.GetTile(position)).movementCost)
+        {       
+            if (UnitManager.actionPoints >= ((ATile)tileMap.GetTile(position)).movementCost)
             {
+                while (objectToMove.transform.position != tileMap.GetCellCenterWorld(position))
+                {
+                    objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, tileMap.GetCellCenterWorld(position), visualMovementSpeed * Time.deltaTime);
+                    yield return new WaitForEndOfFrame();
+                }
+                UnitManager.actionPoints -= ((ATile)tileMap.GetTile(position)).movementCost;
+                yield return new WaitForSeconds(.1f);
+            }
+            else
+            { 
                 cantMoveMore = true;
                 unitIsMoving = false;
                 break;
             }
-            
-            while (objectToMove.transform.position != tileMap.GetCellCenterWorld(position))
-            {
-                objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, tileMap.GetCellCenterWorld(position), visualMovementSpeed * Time.deltaTime);
-                yield return new WaitForEndOfFrame();
-            }
-            UnitManager.actionPoints -= ((ATile)tileMap.GetTile(position)).movementCost;
-
-
-            yield return new WaitForSeconds(.1f);
         }
+
+        if (UnitManager.actionPoints <= 0 || !UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled)
+        {
+            cantMoveMore = true;
+        }
+
         unitIsMoving = false;
     }
 
@@ -269,13 +272,8 @@ public class UnitMovement : MonoBehaviour
                     break;
                 }
             }
-
-            //highlightMap.SetTile(tilePos, pathTile);
-
         }
         //else return null;
-
-
     }
 
 
@@ -487,20 +485,4 @@ public class UnitMovement : MonoBehaviour
     #endregion
 }
 
-public class TileNode
-{
-    public int G { get; set; }
-    public int H { get; set; }
-    public int F { get; set; }
 
-    //Parent node is the node that led to this one, used to retrace back and create a final path
-    public TileNode Parent { get; set; }
-
-    //The position of the tile
-    public Vector3Int Position { get; set; }    
-
-    public TileNode(Vector3Int position)
-    {
-        this.Position = position;
-    }
-}

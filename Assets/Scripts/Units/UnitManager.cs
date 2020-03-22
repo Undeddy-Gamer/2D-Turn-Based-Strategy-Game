@@ -5,8 +5,10 @@ using UnityEngine;
 public class UnitManager : MonoBehaviour
 {
     
-    public static int currUnitTurn;
+    public static int currUnitTurn;    
     public static int actionPoints;
+    //public static BaseUnit currUnit;
+
 
     // List of Units on the map, ordered by which one goes first (initiation)  
     public static List<BaseUnit> gameUnits;
@@ -37,6 +39,11 @@ public class UnitManager : MonoBehaviour
        
     }
 
+    private void Update()
+    {
+        
+    }
+
     // Algorithim to sort units by initiation
     static int SortByInitiation(BaseUnit u1, BaseUnit u2)
     {
@@ -50,8 +57,8 @@ public class UnitManager : MonoBehaviour
 
         // Set Next unit's Turn
         // if the number of units in the unit list is greater than the current unit's index
-        if (gameUnits.Count > currUnitTurn + 1)
-            currUnitTurn++; // increase the index for current by 1
+        if (currUnitTurn < gameUnits.Count - 1)
+            currUnitTurn++; // increase the index for current unit by 1
         else
             currUnitTurn = 0; // restart at the begining of the available units
 
