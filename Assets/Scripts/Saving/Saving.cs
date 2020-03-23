@@ -6,7 +6,7 @@ using System;
 
 public class Saving : MonoBehaviour
 {
-    public Scores[] saveSlots = new Scores[10]; 
+    public Scores[] saveSlots = new Scores[9]; 
     public void Awake()
     {
         //Load Data saved
@@ -25,7 +25,7 @@ public class Saving : MonoBehaviour
             {
                 
                 saveSlots[i].player = data.playerName[i];
-                //set the wave in high to the wave in data
+                
                 saveSlots[i].level = data.level[i];
                 saveSlots[i].turn = data.turn[i];
             }
@@ -37,7 +37,7 @@ public class Saving : MonoBehaviour
             {
                 //Set the player to blank
                 saveSlots[i].player = "Blank";
-                //Set the wave to zero
+                
                 saveSlots[i].level = 0;
                 saveSlots[i].turn = 0;
             }
@@ -47,13 +47,13 @@ public class Saving : MonoBehaviour
     }
 
     //When a new score is added
-    public void NewScore(string name, int number, int completion)
+    public void NewScore(string name, int number, int completion,int savePlace)
     {
         
-        saveSlots[0].level = number;
-        saveSlots[0].turn = completion;
+        saveSlots[savePlace].level = number;
+        saveSlots[savePlace].turn = completion;
         //set the player to equal name
-        saveSlots[0].player = name;
+        saveSlots[savePlace].player = name;
         //Sort
         Sort();
     }
@@ -72,15 +72,15 @@ public class Saving : MonoBehaviour
         //New Highscores class under the refernce data
         SaveData data = new SaveData();
         //New temp string name
-        string[] name = new string[10];
+        string[] name = new string[9];
         //New temp string number
-        int[] number = new int[10];
+        int[] number = new int[9];
         //For every strut in the high array
         for (int i = 0; i < saveSlots.Length; i++)
         {
             
             data.playerName[i] = saveSlots[i].player;
-            //Set data in wave in location i of the array to high in location i of the struts int wave
+            
             data.level[i] = saveSlots[i].level;
             data.turn[i] = saveSlots[i].turn;
         }

@@ -24,10 +24,10 @@ public class Menu : MonoBehaviour
     {
         
     }
-    public void Save()
+    public void Save(int slot)
     {
 
-        handle.NewScore(Name.text, LevelNumber, turn.turnNumber);
+        handle.NewScore(Name.text, LevelNumber, turn.turnNumber, slot);
         
     }
     public void Load(int Slot)
