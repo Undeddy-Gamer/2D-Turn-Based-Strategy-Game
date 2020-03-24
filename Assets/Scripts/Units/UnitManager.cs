@@ -12,6 +12,7 @@ public class UnitManager : MonoBehaviour
 
     // List of Units on the map, ordered by which one goes first (initiation)  
     public static List<BaseUnit> gameUnits;
+    public static BaseUnit currentUnit;
 
     public GameObject gameWorld;
 
@@ -41,7 +42,7 @@ public class UnitManager : MonoBehaviour
 
     private void Update()
     {
-        
+        currentUnit = gameUnits[currUnitTurn];
     }
 
     // Algorithim to sort units by initiation
