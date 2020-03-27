@@ -46,7 +46,7 @@ public class UnitManager : MonoBehaviour
     }
 
     // Algorithim to sort units by initiation
-    static int SortByInitiation(BaseUnit u1, BaseUnit u2)
+    public static int SortByInitiation(BaseUnit u1, BaseUnit u2)
     {
         return u2.baseInitiation.CompareTo(u1.baseInitiation);
     }

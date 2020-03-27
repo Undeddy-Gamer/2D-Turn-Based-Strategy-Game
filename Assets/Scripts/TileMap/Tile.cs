@@ -8,5 +8,7 @@ public class ATile : Tile
     public int movementCost = 1;
     [SerializeField]
     public bool isWalkable = true;
+    [SerializeField]
+    public int damagePerTurn = 0;
 }
 

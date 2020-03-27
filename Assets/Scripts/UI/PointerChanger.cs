@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Butterfly : MonoBehaviour
+public class PointerChanger : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
@@ -13,6 +13,6 @@ public class Butterfly : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //increase curhealth of units up to their max health when they are within the effect zone
+        
     }
 }
