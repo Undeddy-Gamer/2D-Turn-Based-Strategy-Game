@@ -17,17 +17,10 @@ public class UnitMovement : MonoBehaviour
 
     //UnitManager unitManager 
 
-    //public ATile dlTile;
-    //public ATile drTile;
-    //public ATile ulTile;
-    //public ATile urTile;
-    //public ATile rTile;
-    //public ATile lTile;
-
     //change back to private after debugging complete
-    // original unit position
+    // original current unit position
     public Vector3Int origPos;
-    // pos position on click
+    // position on mouse click (move to or attack if tile is occupied by enemy)
     public Vector3 mousePos;
     // goal tile position
     public Vector3Int tilePos;
@@ -39,20 +32,16 @@ public class UnitMovement : MonoBehaviour
     //Pathfinding
     //Meta defining play here
 
-    //public int teamNum;
-    //public int x;
-    //public int y;
-    
     //for ray casting on click (only check tile map layer)
     [SerializeField]
-    private LayerMask mask;
+    private LayerMask hitDetectMask;
 
     // Path Finding Variables
     bool first = true;
     private TileNode current;
     // Node holds all required information we need about a tile to help calculate the fastest available path
     private TileNode currentNode; 
-    // A Stack is a list 'last in first out'
+    // A Stack is basically a List 'last in first out' so perfect for a set path
     private Stack<Vector3Int> path;
     
     //checked list
@@ -80,22 +69,20 @@ public class UnitMovement : MonoBehaviour
             if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && UnitManager.actionPoints > 0)
             {
                 cantMoveMore = false;
-                
                 origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
                 mousePos = Input.mousePosition;
                 tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
 
                 if (Input.GetMouseButtonDown(0) && !unitIsMoving)
                 {
-                    
-                    //Thorws a raycast in the direction of the target
-                    RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity, mask);
+                    //Thorws a raycast where player clicked on map checking only the tilemap (hitDetectMask)
+                    RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity, hitDetectMask);
 
                     if (hit.collider != null)
                     {
+                        Debug.Log("Hit Type: " + hit.transform.parent.transform.name);
                         current = null;
-                        CalculatePath(false);
-
+                        CalculatePath();
                         //Apply movement
                         StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));                        
                         
@@ -106,37 +93,46 @@ public class UnitMovement : MonoBehaviour
                     // Show path unit will take while hovering
                     current = null;
                     highlightMap.ClearAllTiles();
-                    CalculatePath(false);
+
+                    CalculatePath();
                 }
             }
             // else if it's an AI controlled unit's turn
             else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled) 
             {
                 // Do AI Turn
+                if (!unitIsMoving)
+                {
+                    // If AI cannot attack then
+                    /*
+                                      
 
+                    */
+                    Debug.Log("AI Action Points: " + UnitManager.actionPoints);
+                    
+                    //Clear any higlighted tiles
+                    highlightMap.ClearAllTiles();
+                    //Calculate AI movement
+                    CalculateAIMovement();
+
+                    
+                    StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
+                    //Make sure the unit has finished moving before setting next turn
+                    if (!unitIsMoving)
+                    {
+                        UnitManager.SelectNextUnit();
+                        cantMoveMore = false;
+                    }
+                }
                 
-
-                // If AI cannot attack then
-                Debug.Log("AI Unit ID : " + UnitManager.currUnitTurn);
-                Debug.Log("AI Unit Name : " + UnitManager.gameUnits[UnitManager.currUnitTurn].name);
-                Debug.Log("Action Points: " + UnitManager.actionPoints);
-                Debug.Log("Closests Enemy Position ID : " + AIUnitController.GetClosestEnemyUnitPosition());
-                Debug.Log("Unit Count: " + UnitManager.gameUnits.Count);
-               
-                //Clear any higlighted tiles
-                highlightMap.ClearAllTiles();
-                //Calculate AI movement
-                CalculateAIMovement();                    
-                StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
-
-                
-                //UnitManager.SelectNextUnit();
-                //cantMoveMore = false;
-
 
                 //else
                 //AI Unit Attack
-            }                
+            }
+            else
+            {
+                highlightMap.ClearAllTiles();
+            }
             //// else if is AI controlled unit's turn and has no more action points
             //else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && cantMoveMore) 
             //{
@@ -155,17 +151,14 @@ public class UnitMovement : MonoBehaviour
 
     private void CalculateAIMovement()
     {        
-        if (!cantMoveMore)
-        {
-            //
-            origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
-            tilePos = tileMap.WorldToCell(UnitManager.gameUnits[AIUnitController.GetClosestEnemyUnitPosition()].transform.position);
-            current = null;
-            CalculatePath(false);
-        }
-        else
-            cantMoveMore = false;
-            UnitManager.SelectNextUnit();
+        //Set position of unit
+        origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
+        //Set goal position
+        tilePos = tileMap.WorldToCell(UnitManager.gameUnits[AIUnitController.GetClosestEnemyUnitPosition()].transform.position);
+        //reset path finding 
+        current = null;
+        //calculate path
+        CalculatePath();
     }
 
     
@@ -216,7 +209,7 @@ public class UnitMovement : MonoBehaviour
         // get  the original start position node
         current = GetNode(origPos);
 
-        //Create an 'open list' for nodes to check later if required
+        //Create a new 'open list' for nodes to check later if required
         openList = new HashSet<TileNode>();
 
         //Creates a 'closed list' for nodes that we have checked
@@ -232,8 +225,9 @@ public class UnitMovement : MonoBehaviour
     }
 
 
-    public void CalculatePath(bool step)
+    public void CalculatePath()
     {
+
         if (current == null)
         {
             Initialize();
@@ -245,25 +239,21 @@ public class UnitMovement : MonoBehaviour
             ExamineNeighbours(neighbours, current);
             UpdateCurrentTile(ref current);
             path = GeneratePath(current);
-
-            if (step)
-            {
-                break;
-            }
         }
 
 
-        // show path on map (debugging)
+        // show path on map for player to see
         if (path != null)
         {
             int tempAP = UnitManager.actionPoints;
-            
+            // iterate through path nodes and set the 'highlight' overlay grid nodes to highlight hex tile
             foreach (Vector3Int position in path)
             {
+                //check available action p[oints for unit against the movement cost of the next tile
                 int nextTileMoveCost = ((ATile)tileMap.GetTile(position)).movementCost;
-                tempAP -= nextTileMoveCost;
-                //Debug.Log("AP Available: " + tempAP);
-                
+                tempAP -= nextTileMoveCost;                
+
+                //highlight path so player can see it on the map
                 highlightMap.SetTile(position, pathTile);
                 
                 
@@ -454,16 +444,16 @@ public class UnitMovement : MonoBehaviour
     }
 
 
-    //Calculates teh values we will use to (as efficiently as possible) guess and check the next nodes to check
+    //Calculates teh values we will use to (as efficiently as possible) guess the next nodes to check
     private void CalcValues(TileNode parent, TileNode neighbour, int cost)
     {
         //Sets the parent node
         neighbour.Parent = parent;
-        //Calculates this nodes g cost, The parents g cost + what it costs to move tot his node
+        //Calculates this nodes g cost, The parents g cost + what it costs to move to this tile
         neighbour.G = parent.G + cost;
-        //H is calucalted, it's the distance from this node to the goal * 10
+        //H is calucalted (the distance from this node to the goal * 10)
         neighbour.H = ((Math.Abs((neighbour.Position.x - tilePos.x)) + Math.Abs((neighbour.Position.y - tilePos.y))) * 10);
-        //F is calcualted 
+        //F is both numbers above together
         neighbour.F = neighbour.G + neighbour.H;
     }
 
@@ -477,7 +467,7 @@ public class UnitMovement : MonoBehaviour
         else
         {
             TileNode node = new TileNode(position);
-            node.G = 5;
+            node.G = 1;
             allNodes.Add(position, node);
             return node;
         }

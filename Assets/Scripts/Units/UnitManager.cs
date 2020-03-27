@@ -16,7 +16,7 @@ public class UnitManager : MonoBehaviour
 
     public GameObject gameWorld;
 
-    void Awake()
+    void Start()
     {
 
         //Create a list of all units on the battlefield
@@ -51,6 +51,8 @@ public class UnitManager : MonoBehaviour
         return u2.baseInitiation.CompareTo(u1.baseInitiation);
     }
 
+
+
     public static void SelectNextUnit()
     {
         //deactivate current Unit
@@ -63,11 +65,14 @@ public class UnitManager : MonoBehaviour
         else
             currUnitTurn = 0; // restart at the begining of the available units
 
+
+        Debug.Log("New Current Unit: " + gameUnits[currUnitTurn].name);
+        Debug.Log("New Current Unit Speed: " + gameUnits[currUnitTurn].baseMovementSpeed);
         // set next unit to active
         gameUnits[currUnitTurn].active = true;
         //update available action points
         actionPoints = gameUnits[currUnitTurn].baseMovementSpeed;
-        
+        Debug.Log("New Actionpoints: " + actionPoints);
         // set player turn in turn manager???
         if (gameUnits[currUnitTurn].playerControlled)
             TurnManager.PlayerTurn = true;

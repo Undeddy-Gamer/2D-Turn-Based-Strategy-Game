@@ -37,20 +37,24 @@ public class TurnManager : MonoBehaviour
 
     void Update()
     {
-        if (PlayerTurn)
-            button.color = Color.blue;
-        else        
-            button.color = Color.red;
 
-        turnText.text = "Turn: " + turnNumber + " " + whosTurnIsitAnyway;
-        if(PlayerTurn)
+
+        PlayerTurn = UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled;
+
+        if (PlayerTurn)
         {
             whosTurnIsitAnyway = "Player";
+            button.color = Color.blue;
         }
         else
         {
             whosTurnIsitAnyway = "Enemy";
+            button.color = Color.red;
         }
+
+        turnText.text = "Turn: " + turnNumber + " " + whosTurnIsitAnyway;
+
+
         // Eddie asks What is this for below?        
         //if (TurnEnds >= 0)
         //{
