@@ -2,6 +2,8 @@
 using UnityEngine.Tilemaps;
 
 [CreateAssetMenu(fileName = "New Tile", menuName = "Tiles/ATile")]
+
+[System.Serializable]
 public class ATile : Tile
 {
     [SerializeField]

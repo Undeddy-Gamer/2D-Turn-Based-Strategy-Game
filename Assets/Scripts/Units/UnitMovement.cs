@@ -10,14 +10,13 @@ using System.Linq;
 public class UnitMovement : MonoBehaviour
 {
 
+    //
     public Tilemap tileMap;
     public Tilemap highlightMap;
     public ATile baseTile;
     public ATile pathTile;
 
-    //UnitManager unitManager 
-
-    //change back to private after debugging complete
+    //change below back to private after debugging complete
     // original current unit position
     public Vector3Int origPos;
     // position on mouse click (move to or attack if tile is occupied by enemy)
@@ -25,19 +24,20 @@ public class UnitMovement : MonoBehaviour
     // goal tile position
     public Vector3Int tilePos;
 
+    public PointerChanger pointerChanger;
     
     //how fast the unit trabels over the map visually
     public float visualMovementSpeed = .75f;
 
-    //Pathfinding
-    //Meta defining play here
+    
 
     //for ray casting on click (only check tile map layer)
     [SerializeField]
     private LayerMask hitDetectMask;
 
     // Path Finding Variables
-    bool first = true;
+    //bool first = true;
+
     private TileNode current;
     // Node holds all required information we need about a tile to help calculate the fastest available path
     private TileNode currentNode; 
@@ -55,6 +55,11 @@ public class UnitMovement : MonoBehaviour
     // tells us if the unit is stopped because the next tile costs more AP than it has available
     public bool cantMoveMore = false;
 
+    //private int tempAP;
+    //Indicator to show if the tile mouse is hovering over has changed
+    private bool mouseOverTileChanged = false;
+    private Vector3Int prevMousOverTilePos;
+    
     private void Start()
     {
         
@@ -65,7 +70,8 @@ public class UnitMovement : MonoBehaviour
     {
 
         if (!Menu.isPaused)
-        {            
+        {   
+
             if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && UnitManager.actionPoints > 0)
             {
                 cantMoveMore = false;
@@ -73,29 +79,43 @@ public class UnitMovement : MonoBehaviour
                 mousePos = Input.mousePosition;
                 tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
 
-                if (Input.GetMouseButtonDown(0) && !unitIsMoving)
+                if (tileMap.GetTile(tilePos) != null)
                 {
-                    //Thorws a raycast where player clicked on map checking only the tilemap (hitDetectMask)
-                    RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity, hitDetectMask);
-
-                    if (hit.collider != null)
+                    if (tilePos != prevMousOverTilePos)
                     {
-                        Debug.Log("Hit Type: " + hit.transform.parent.transform.name);
+                        prevMousOverTilePos = tilePos;
+                        mouseOverTileChanged = true;
+                        highlightMap.ClearAllTiles();                        
+                    }
+                    else
+                        mouseOverTileChanged = false;
+
+                    if (Input.GetMouseButtonDown(0) && !unitIsMoving)
+                    {
+                        //Thorws a raycast where player clicked on map checking only the tilemap (hitDetectMask)
+                        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity, hitDetectMask);
+
+                        if (hit.collider != null)
+                        {
+                            current = null;
+                            CalculatePath();
+                            //Apply movement
+                            StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
+
+                        }
+                    }
+                    else if (!unitIsMoving && mouseOverTileChanged)
+                    {
+                        // Show path unit will take while hovering
+
                         current = null;
+
                         CalculatePath();
-                        //Apply movement
-                        StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));                        
-                        
                     }
                 }
-                else if (!unitIsMoving)
-                {
-                    // Show path unit will take while hovering
-                    current = null;
-                    highlightMap.ClearAllTiles();
-
-                    CalculatePath();
-                }
+                else
+                    pointerChanger.SetCursor("Normal");
+                
             }
             // else if it's an AI controlled unit's turn
             else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled) 
@@ -202,7 +222,7 @@ public class UnitMovement : MonoBehaviour
         // Path Finding Code
 
     #region PathFinding
-
+        
 
     private void Initialize()
     {
@@ -214,14 +234,12 @@ public class UnitMovement : MonoBehaviour
 
         //Creates a 'closed list' for nodes that we have checked
         closedList = new HashSet<TileNode>();
-
-        //changedTiles = new HashSet<Vector3Int>();
-
+        
         //Adds the current node to the open list
         openList.Add(current);
 
         path = null;
-        first = false;
+        //first = false;
     }
 
 
@@ -236,9 +254,14 @@ public class UnitMovement : MonoBehaviour
         while (openList.Count > 0 && path == null)
         {
             List<TileNode> neighbours = FindNeighbours(current.Position);
+
+            //Debug.Log("neighbours: " + neighbours.Count);
+
             ExamineNeighbours(neighbours, current);
             UpdateCurrentTile(ref current);
             path = GeneratePath(current);
+
+            
         }
 
 
@@ -251,16 +274,19 @@ public class UnitMovement : MonoBehaviour
             {
                 //check available action p[oints for unit against the movement cost of the next tile
                 int nextTileMoveCost = ((ATile)tileMap.GetTile(position)).movementCost;
-                tempAP -= nextTileMoveCost;                
-
                 //highlight path so player can see it on the map
-                highlightMap.SetTile(position, pathTile);
-                
-                
                 if (tempAP < nextTileMoveCost)
-                {                    
+                {
+                    pointerChanger.SetCursor("Invalid");
                     break;
                 }
+                else 
+                {
+                    highlightMap.SetTile(position, pathTile);
+                    pointerChanger.SetCursor("Move");
+                }
+
+                tempAP -= nextTileMoveCost;
             }
         }
         //else return null;
@@ -288,7 +314,10 @@ public class UnitMovement : MonoBehaviour
 
         //RIGHT Get the Tile to the right of current tile and add to neighbour  list if a viable tile
         tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x + 1, tilePosition.y, 0));
+
         //Check if there is a tile there
+        
+
         if (tempTile != null)
         {
             // check if tile is walkable or the current unit can fly
@@ -342,7 +371,6 @@ public class UnitMovement : MonoBehaviour
                 neighbours.Add(neighbour);
             }
         }
-
         
 
         //DOWNLEFT Get the Tile up and to the right of current tile and add to neighbour list if a viable tile
@@ -384,7 +412,7 @@ public class UnitMovement : MonoBehaviour
 
             int gScore = ((ATile)tileMap.GetTile(neighbour.Position)).movementCost;
 
-            // Take an Educated guess which will be the fastest way to goal
+            // Take an Educated guess which will be the fastest way to goal using tile to goal 'as the crow flies' distance and tile move value
             if (openList.Contains(neighbour))
             {
                 if (current.G + gScore < neighbour.G)
@@ -452,7 +480,7 @@ public class UnitMovement : MonoBehaviour
         //Calculates this nodes g cost, The parents g cost + what it costs to move to this tile
         neighbour.G = parent.G + cost;
         //H is calucalted (the distance from this node to the goal * 10)
-        neighbour.H = ((Math.Abs((neighbour.Position.x - tilePos.x)) + Math.Abs((neighbour.Position.y - tilePos.y))) * 10);
+        neighbour.H = ((Math.Abs((neighbour.Position.x - tilePos.x)) + Math.Abs((neighbour.Position.y - tilePos.y))) * 20);
         //F is both numbers above together
         neighbour.F = neighbour.G + neighbour.H;
     }
