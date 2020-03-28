@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Combat : MonoBehaviour
-{
-    //game object refers to both the attacker and the defendor
+
     
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+{
+    public UnitMovement um;
+
+    //game object refers to both the attacker and the defendor
+
+
     //deal damage to defendor based on attacker base damage + modifers
     //apply status efffects to the defender
     //destroy defender if health less then 1
@@ -19,4 +19,15 @@ public class Combat : MonoBehaviour
     {
         
     }
+
+    public void MeleeAttack()
+    {
+
+    }
+
+
+    //public ATile[] CheckUnitAdacent()
+    //{
+        
+    //}
 }
