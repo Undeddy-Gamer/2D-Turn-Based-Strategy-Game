@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class UnitManager : MonoBehaviour
@@ -8,13 +9,18 @@ public class UnitManager : MonoBehaviour
     public static int currUnitTurn;    
     public static int actionPoints;
     //public static BaseUnit currUnit;
-
+    
+    public Text unitStats;
+    public Image unitIcon;
 
     // List of Units on the map, ordered by which one goes first (initiation)  
     public static List<BaseUnit> gameUnits;
     public static BaseUnit currentUnit;
 
     public GameObject gameWorld;
+
+    private int prevAP = 0;
+    private float prevHealth = 0;
 
     void Start()
     {
@@ -37,12 +43,24 @@ public class UnitManager : MonoBehaviour
         currUnitTurn = 0;
 
         actionPoints = gameUnits[currUnitTurn].baseMovementSpeed;
-       
+
+        //unitIcon =
+
+        
+        unitIcon.sprite = gameUnits[currUnitTurn].GetComponentInParent<SpriteRenderer>().sprite;
+        
     }
 
     private void Update()
     {
         currentUnit = gameUnits[currUnitTurn];
+
+        if (actionPoints != prevAP || gameUnits[currUnitTurn].currentHealth != prevHealth)
+        {
+            unitStats.text = "A/P: " + actionPoints + "\nHealth: " + gameUnits[currUnitTurn].currentHealth + "\nDanage: " + gameUnits[currUnitTurn].baseAttack;
+            prevAP = actionPoints;
+            prevHealth = gameUnits[currUnitTurn].currentHealth;
+        }
     }
 
     // Algorithim to sort units by initiation
@@ -53,7 +71,7 @@ public class UnitManager : MonoBehaviour
 
 
 
-    public static void SelectNextUnit()
+    public void SelectNextUnit()
     {
         //deactivate current Unit
         gameUnits[currUnitTurn].active = false;
@@ -66,18 +84,19 @@ public class UnitManager : MonoBehaviour
             currUnitTurn = 0; // restart at the begining of the available units
 
 
-        Debug.Log("New Current Unit: " + gameUnits[currUnitTurn].name);
-        Debug.Log("New Current Unit Speed: " + gameUnits[currUnitTurn].baseMovementSpeed);
+       
         // set next unit to active
         gameUnits[currUnitTurn].active = true;
         //update available action points
         actionPoints = gameUnits[currUnitTurn].baseMovementSpeed;
-        Debug.Log("New Actionpoints: " + actionPoints);
+        
         // set player turn in turn manager???
         if (gameUnits[currUnitTurn].playerControlled)
             TurnManager.PlayerTurn = true;
         else
             TurnManager.PlayerTurn = false;
+
+        unitIcon.sprite = gameUnits[currUnitTurn].transform.GetComponent<SpriteRenderer>().sprite;        
     }
 
 

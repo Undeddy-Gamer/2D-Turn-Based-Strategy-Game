@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: HexPlayerHighlight
   m_EditorClassIdentifier: Assembly-CSharp::ATile
-  m_Sprite: {fileID: 21300000, guid: b055095904a03d84b9f9f3ac6d8fe2e5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cf962d325481e14438a8083ace498037, type: 3}
   m_Color: {r: 0, g: 0, b: 1, a: 1}
   m_Transform:
     e00: 1

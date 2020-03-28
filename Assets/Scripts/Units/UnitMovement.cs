@@ -36,6 +36,8 @@ public class UnitMovement : MonoBehaviour
     // tells us if the unit is stopped because the next tile costs more AP than it has available
     public bool cantMoveMore = false;
 
+    public UnitManager unitManager;
+
 
     [Header("Misc Variables")]
     public PointerChanger pointerChanger;    
@@ -89,17 +91,18 @@ public class UnitMovement : MonoBehaviour
                 tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
                 HighLightUnits();
 
+                if (tilePos != prevMousOverTilePos)
+                {
+                    prevMousOverTilePos = tilePos;
+                    mouseOverTileChanged = true;
+                    highlightPathMap.ClearAllTiles();
+                }
+                else
+                    mouseOverTileChanged = false;
+
+
                 if (tileMap.GetTile(tilePos) != null)
                 {
-                    if (tilePos != prevMousOverTilePos)
-                    {
-                        prevMousOverTilePos = tilePos;
-                        mouseOverTileChanged = true;
-                        highlightPathMap.ClearAllTiles();                        
-                    }
-                    else
-                        mouseOverTileChanged = false;
-
                     if (Input.GetMouseButtonDown(0) && !unitIsMoving)
                     {
                         //Thorws a raycast where player clicked on map checking only the tilemap (hitDetectMask)
@@ -124,8 +127,19 @@ public class UnitMovement : MonoBehaviour
                     }
                 }
                 else
+                {
+                    //if(mouseOverTileChanged)
+                    //{ 
+                    //    if (((ATile)tileMap.GetTile(tilePos)).)
+                    highlightPathMap.ClearAllTiles();
                     pointerChanger.SetCursor("Normal");
-                
+
+
+                    //}
+
+
+                }
+
             }
             // else if it's an AI controlled unit's turn
             else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled) 
@@ -152,7 +166,7 @@ public class UnitMovement : MonoBehaviour
                     //Make sure the unit has finished moving before setting next turn
                     if (!unitIsMoving)
                     {
-                        UnitManager.SelectNextUnit();
+                        unitManager.SelectNextUnit();
                         cantMoveMore = false;
                     }
                 }
@@ -478,7 +492,8 @@ public class UnitMovement : MonoBehaviour
                     gScore -= 1;
                 }
             }
-            
+
+            //gScore *= 2;
 
             // Take an Educated guess which will be the fastest way to goal using tile to goal 'as the crow flies' distance and tile move value
             if (openList.Contains(neighbour))
@@ -545,7 +560,7 @@ public class UnitMovement : MonoBehaviour
     {
         //Sets the parent node
         neighbour.Parent = parent;
-        //Calculates this nodes g cost, The parents g cost + what it costs to move to this tile
+        //Calculates this nodes g cost, The parents g cost + what it costs to move to this tile        
         neighbour.G = parent.G + cost;
         //H is calucalted (the distance from this node to the goal * 10)
         neighbour.H = ((Math.Abs((neighbour.Position.x - tilePos.x)) + Math.Abs((neighbour.Position.y - tilePos.y))) * 2);
@@ -563,7 +578,7 @@ public class UnitMovement : MonoBehaviour
         else
         {
             TileNode node = new TileNode(position);
-            node.G = 1;
+            node.G = 5;
             allNodes.Add(position, node);
             return node;
         }

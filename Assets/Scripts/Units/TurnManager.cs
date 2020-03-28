@@ -13,6 +13,8 @@ public class TurnManager : MonoBehaviour
     public static bool PlayerTurn;
     public Image button;
 
+    public UnitManager unitManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -30,7 +32,7 @@ public class TurnManager : MonoBehaviour
         TurnEnds += 1;
 
         //UnitManager manages player turn bool
-        UnitManager.SelectNextUnit();
+        unitManager.SelectNextUnit();
         
     }
 
@@ -52,7 +54,7 @@ public class TurnManager : MonoBehaviour
             button.color = Color.red;
         }
 
-        turnText.text = "Turn: " + turnNumber + " " + whosTurnIsitAnyway;
+        turnText.text = whosTurnIsitAnyway + "'s Turn: " + turnNumber;
 
 
         // Eddie asks What is this for below?        
