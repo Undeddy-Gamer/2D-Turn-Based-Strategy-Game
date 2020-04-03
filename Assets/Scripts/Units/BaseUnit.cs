@@ -25,19 +25,19 @@ public class BaseUnit : MonoBehaviour
     
     private void Update()
     {
-        //if (TurnManager.TurnEnds >= 0)
-        //{
-        //    actionPoints = 2;
-        //}   
-        
-        if (active)
+        if (currentHealth <= 0)
         {
-            // add glow or UI element (helth/movement) to unit to indicate current units turn
+            Death();
         }
     }
 
 
+    public void Death()
+    {
 
+
+        Object.Destroy(this);
+    }
 
    
 
