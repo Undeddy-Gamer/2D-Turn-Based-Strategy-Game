@@ -1,22 +1,22 @@
 fileFormatVersion: 2
-guid: 5ae55c2950221264cb3bb6e892eee0c6
+guid: 7356e016100abc047a91967bfe162e4f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8320102380781528936
-    second: ant_0
+      213: -170131892086433782
+    second: beetle_0
   - first:
-      213: 5359879180938795770
-    second: ant_1
+      213: 8955630745802493176
+    second: beetle_1
   - first:
-      213: 4633991597904760959
-    second: ant_2
+      213: -850375253287257138
+    second: beetle_2
   - first:
-      213: -1261253993027305625
-    second: ant_3
+      213: 8189239267110657558
+    second: beetle_3
   - first:
-      213: -9063406064706534977
-    second: ant_4
+      213: 1627736798504065725
+    second: beetle_4
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -101,13 +101,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ant_0
+      name: beetle_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 58
-        height: 72
+        width: 203
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,20 +115,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 89892aa67fe098c80800000000000000
-      internalID: -8320102380781528936
+      spriteID: a08193f02f193adf0800000000000000
+      internalID: -170131892086433782
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_1
+      name: beetle_1
       rect:
         serializedVersion: 2
-        x: 58
+        x: 203
         y: 0
-        width: 58
-        height: 72
+        width: 203
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -136,20 +136,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: afa5eda97bd126a40800000000000000
-      internalID: 5359879180938795770
+      spriteID: 8fccf1fd6bac84c70800000000000000
+      internalID: 8955630745802493176
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_2
+      name: beetle_2
       rect:
         serializedVersion: 2
-        x: 116
+        x: 406
         y: 0
-        width: 58
-        height: 72
+        width: 203
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -157,20 +157,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f70124d6ece3f4040800000000000000
-      internalID: 4633991597904760959
+      spriteID: ecbb70e663cd234f0800000000000000
+      internalID: -850375253287257138
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_3
+      name: beetle_3
       rect:
         serializedVersion: 2
-        x: 174
+        x: 609
         y: 0
-        width: 58
-        height: 72
+        width: 203
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,20 +178,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 76f701efc202f7ee0800000000000000
-      internalID: -1261253993027305625
+      spriteID: 61e9fc899b506a170800000000000000
+      internalID: 8189239267110657558
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_4
+      name: beetle_4
       rect:
         serializedVersion: 2
-        x: 232
+        x: 812
         y: 0
-        width: 58
-        height: 72
+        width: 203
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -199,8 +199,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fb1cb024430583280800000000000000
-      internalID: -9063406064706534977
+      spriteID: dba9aae7ef1e69610800000000000000
+      internalID: 1627736798504065725
       vertices: []
       indices: 
       edges: []

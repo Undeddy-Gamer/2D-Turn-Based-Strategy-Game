@@ -1,22 +1,22 @@
 fileFormatVersion: 2
-guid: 5ae55c2950221264cb3bb6e892eee0c6
+guid: 84a2d79796a9b9c45a06397fd3275a85
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8320102380781528936
-    second: ant_0
+      213: 4361804571333186455
+    second: moth_0
   - first:
-      213: 5359879180938795770
-    second: ant_1
+      213: 5829204987843613058
+    second: moth_1
   - first:
-      213: 4633991597904760959
-    second: ant_2
+      213: 2965414441689777094
+    second: moth_2
   - first:
-      213: -1261253993027305625
-    second: ant_3
+      213: -889359840179323168
+    second: moth_3
   - first:
-      213: -9063406064706534977
-    second: ant_4
+      213: -3617739333675412428
+    second: moth_4
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -101,13 +101,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ant_0
+      name: moth_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 58
-        height: 72
+        width: 87
+        height: 134
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,20 +115,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 89892aa67fe098c80800000000000000
-      internalID: -8320102380781528936
+      spriteID: 7935df5d52e388c30800000000000000
+      internalID: 4361804571333186455
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_1
+      name: moth_1
       rect:
         serializedVersion: 2
-        x: 58
+        x: 87
         y: 0
-        width: 58
-        height: 72
+        width: 87
+        height: 134
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -136,41 +136,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: afa5eda97bd126a40800000000000000
-      internalID: 5359879180938795770
+      spriteID: 2819a5f4d0f75e050800000000000000
+      internalID: 5829204987843613058
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_2
-      rect:
-        serializedVersion: 2
-        x: 116
-        y: 0
-        width: 58
-        height: 72
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f70124d6ece3f4040800000000000000
-      internalID: 4633991597904760959
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ant_3
+      name: moth_2
       rect:
         serializedVersion: 2
         x: 174
         y: 0
-        width: 58
-        height: 72
+        width: 87
+        height: 134
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,20 +157,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 76f701efc202f7ee0800000000000000
-      internalID: -1261253993027305625
+      spriteID: 6c38bb829b4472920800000000000000
+      internalID: 2965414441689777094
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ant_4
+      name: moth_3
       rect:
         serializedVersion: 2
-        x: 232
+        x: 261
         y: 0
-        width: 58
-        height: 72
+        width: 87
+        height: 134
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -199,8 +178,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fb1cb024430583280800000000000000
-      internalID: -9063406064706534977
+      spriteID: 0eefc98ffeb58a3f0800000000000000
+      internalID: -889359840179323168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moth_4
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 0
+        width: 87
+        height: 134
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 434915e5e353bcdc0800000000000000
+      internalID: -3617739333675412428
       vertices: []
       indices: 
       edges: []
