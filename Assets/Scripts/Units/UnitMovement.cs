@@ -10,7 +10,7 @@ using System.Linq;
 public class UnitMovement : MonoBehaviour
 {
 
-    [Header("Hex Grid Variables")]
+    [Header("Hex Grid References")]
     public Tilemap tileMap;
     public Tilemap highlightPathMap;
     public Tilemap highlightUnitMap;
@@ -18,12 +18,20 @@ public class UnitMovement : MonoBehaviour
     public ATile pathTile;
     public ATile playerTile;
     public ATile enemyTile;
-    //for ray casting on click (only check tile map layer)
-    [SerializeField]
-    private LayerMask RaycastDetectMask;
 
+
+    [Header("Other References")]
+    public PointerChanger pointerChanger;
+    //how fast the unit trabels over the map visually
+    public UnitManager unitManager;
+    
 
     [Header("Movement Variables")]
+    //for ray casting on click (only check tile map layer)
+    public LayerMask RaycastDetectMask;
+    // default visual movement speed of units
+    public float visualMovementSpeed = .75f;
+
     //change below back to private after debugging complete
     // original current unit position
     public Vector3Int origPos;
@@ -36,44 +44,32 @@ public class UnitMovement : MonoBehaviour
     // tells us if the unit is stopped because the next tile costs more AP than it has available
     public bool cantMoveMore = false;
 
-    public UnitManager unitManager;
+
+    //Indicator to show if the tile mouse is hovering over has changed
+    private bool mouseOverTileChanged = false;
+    //last position of tile mouse was hovering over
+    private Vector3Int prevMousOverTilePos;
 
 
-    [Header("Misc Variables")]
-    public PointerChanger pointerChanger;    
-    //how fast the unit trabels over the map visually
-    public float visualMovementSpeed = .75f;
-
-    
-
-   
 
     // Path Finding Variables
-    //bool first = true;
-
     private TileNode current;
-    // Node holds all required information we need about a tile to help calculate the fastest available path
-    private TileNode currentNode; 
     // A Stack is basically a List 'last in first out' so perfect for a set path
     private Stack<Vector3Int> path;
-    
     //checked list
     private HashSet<TileNode> openList;
     private HashSet<TileNode> closedList;
     //we are using HashSets above to avoid duplication of nodes in our lists and help with performance compared to other types of lists
-
     private Dictionary<Vector3Int, TileNode> allNodes = new Dictionary<Vector3Int, TileNode>();
 
-    
 
-    //private int tempAP;
-    //Indicator to show if the tile mouse is hovering over has changed
-    private bool mouseOverTileChanged = false;
-    private Vector3Int prevMousOverTilePos;
-    
+
     private void Start()
     {
-        //HighLightUnits();
+       
+        UpdateUnitPositions();
+
+        
     }
 
 
@@ -81,143 +77,183 @@ public class UnitMovement : MonoBehaviour
     {
 
         if (!Menu.isPaused)
-        {   
-
-            if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && UnitManager.actionPoints > 0)
+        {
+            // If is player's unit turn which has action points
+            if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled && unitManager.actionPoints > 0)
             {
-                cantMoveMore = false;
-                origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
-                mousePos = Input.mousePosition;
-                tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
-                HighLightUnits();
-
-                if (tilePos != prevMousOverTilePos)
-                {
-                    prevMousOverTilePos = tilePos;
-                    mouseOverTileChanged = true;
-                    highlightPathMap.ClearAllTiles();
-                }
-                else
-                    mouseOverTileChanged = false;
-
-
-                if (tileMap.GetTile(tilePos) != null)
-                {
-                    if (Input.GetMouseButtonDown(0) && !unitIsMoving)
-                    {
-                        //Thorws a raycast where player clicked on map checking only the tilemap (hitDetectMask)
-                        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity, RaycastDetectMask);
-
-                        if (hit.collider != null)
-                        {
-                            current = null;
-                            CalculatePath();
-                            //Apply movement
-                            StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
-                            HighLightUnits();
-                        }
-                    }
-                    else if (!unitIsMoving && mouseOverTileChanged)
-                    {
-                        // Show path unit will take while hovering
-
-                        current = null;
-
-                        CalculatePath();
-                    }
-                }
-                else
-                {
-                    //if(mouseOverTileChanged)
-                    //{ 
-                    //    if (((ATile)tileMap.GetTile(tilePos)).)
-                    highlightPathMap.ClearAllTiles();
-                    pointerChanger.SetCursor("Normal");
-
-
-                    //}
-
-
-                }
-
+                PlayerTurn();
+                //UpdateUnitPositions();
             }
             // else if it's an AI controlled unit's turn
-            else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled) 
+            else if (!unitManager.gameUnits[unitManager.currUnitTurn].playerControlled)
             {
-                // Do AI Turn
-                if (!unitIsMoving)
-                {
-                    // If AI cannot attack then
-                    /*
-                    
-
-                    */
-
-
-                    //Clear any higlighted tiles
-                    highlightPathMap.ClearAllTiles();
-                    
-                    //Calculate AI movement
-                    CalculateAIMovement();
-
-                    
-                    StartCoroutine(moveViaPath(UnitManager.gameUnits[UnitManager.currUnitTurn].gameObject));
-                    HighLightUnits();
-                    //Make sure the unit has finished moving before setting next turn
-                    if (!unitIsMoving)
-                    {
-                        unitManager.SelectNextUnit();
-                        cantMoveMore = false;
-                    }
-                }
-                
-
-                //else
-                //AI Unit Attack
+                AITurn();
+                //UpdateUnitPositions();
             }
             else
             {
+                pointerChanger.SetCursor("Normal");
                 highlightPathMap.ClearAllTiles();
-                
-            }
-            //// else if is AI controlled unit's turn and has no more action points
-            //else if (!UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled && cantMoveMore) 
-            //{
-            //    //Initiate next unit turn
-            //    cantMoveMore = false;
-            //    UnitManager.SelectNextUnit();
-            //}
-            // else wait for player to click end turn button
-        }
-
-
+                // highlight end turn button
+            }            
+        }        
     }
 
 
-    private void HighLightUnits()
+
+
+    // Updates the highlight/indicator overlay for the units showing th eplayer which units are theirs or enemy
+    private void UpdateUnitPositions()
     {
         highlightUnitMap.ClearAllTiles();
-        foreach (BaseUnit item in UnitManager.gameUnits)
-        {
-            Vector3Int tempPos = highlightUnitMap.WorldToCell(item.transform.position);
 
+        foreach (BaseUnit item in unitManager.gameUnits)
+        {
             if (item.playerControlled)
-                highlightUnitMap.SetTile(tempPos, playerTile);            
+                highlightUnitMap.SetTile(item.currentTilePosition, playerTile);
             else
-                highlightUnitMap.SetTile(tempPos, enemyTile);
+                highlightUnitMap.SetTile(item.currentTilePosition, enemyTile);
+
 
         }
     }
+
+
+    public bool CheckUnitAtPosition(Vector3Int checkPosition, ref bool isPlayerUnit)
+    {        
+        bool occupied = false;
+
+       // Debug.Log("Check Unit At Position: " + checkPosition);
+
+        foreach (BaseUnit item in unitManager.gameUnits)
+        {
+            if (tileMap.WorldToCell(item.transform.position).Equals(checkPosition))
+            {
+                //Debug.Log("Has Unit player : " + item.playerControlled);
+                isPlayerUnit = item.playerControlled;
+                occupied = true;
+                break;
+            }
+            //Debug.Log("Unit Position: " + tileMap.WorldToCell(item.transform.position) + " | Check Position: " + checkPosition);
+        }
+
+        return occupied;
+    }
+
+
+
+
+
+    private void PlayerTurn()
+    {
+        cantMoveMore = false;
+        
+        mousePos = Input.mousePosition;
+        tilePos = tileMap.WorldToCell(Camera.main.ScreenToWorldPoint(mousePos));
+        ATile mouseOverTile = (ATile)tileMap.GetTile(tilePos);
+        //FindNeighbours(origPos);
+
+        if (tilePos != prevMousOverTilePos)
+        {
+            prevMousOverTilePos = tilePos;
+            mouseOverTileChanged = true;
+            highlightPathMap.ClearAllTiles();      
+        }
+        else
+            mouseOverTileChanged = false;
+
+        
+        if (mouseOverTile != null)
+        {
+            origPos = tileMap.WorldToCell(unitManager.gameUnits[unitManager.currUnitTurn].transform.position);
+            //if mouse button clicked then try and initiate movment
+            if (Input.GetMouseButtonDown(0) && !unitIsMoving)
+            {
+                // Thorw a raycast where player clicked on map help to distinguish whether is was on a tile or UI
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos), Vector2.zero, Mathf.Infinity);
+
+                if (hit.collider != null)
+                {                    
+                    current = null;
+                    CalculatePath();
+                    //Apply movement/attack
+                    StartCoroutine(moveViaPath(unitManager.gameUnits[unitManager.currUnitTurn].gameObject));                    
+                }
+            }
+            else if (!unitIsMoving && mouseOverTileChanged)
+            {
+                // Show path unit will take while hovering
+                current = null;
+                CalculatePath();
+                ShowPathOnMap();
+                /* Check if there is a unit on the mouse over tile
+                 * if not player controlled then it's an enemy, set the mouse cursor as attack  */
+                /*if (CheckUnitAtPosition(tilePos))
+                {
+                    if (!mouseOverTile.gameObject.GetComponent<BaseUnit>().playerControlled)
+                    {
+                        //change pointer to Attack                            
+                        pointerChanger.SetCursor("MeleeAttack");
+                    }
+                }*/
+            }
+
+        }
+        else  // Set cursor to 'Normal' if mouse over tile is null
+        {
+            highlightPathMap.ClearAllTiles();
+            pointerChanger.SetCursor("Normal");
+        }
+    }
+
+
+   
+
+
+    
+
+
+
 
 
     #region AIMovement
 
+    private void AITurn()
+    {
+        pointerChanger.SetCursor("Normal");
+
+        // Do AI Turn
+        if (!unitIsMoving)
+        {
+            // If AI cannot do a ranged attack then
+
+            //Clear any higlighted tiles
+            highlightPathMap.ClearAllTiles();
+
+            //Calculate AI movement
+            CalculateAIMovement();
+
+            StartCoroutine(moveViaPath(unitManager.gameUnits[unitManager.currUnitTurn].gameObject));
+
+            //unitManager.gameUnits[unitManager.currUnitTurn].currentTilePosition = tileMap.WorldToCell(unitManager.gameUnits[unitManager.currUnitTurn].transform.position);
+
+            //Make sure the unit has finished moving before setting next turn
+            if (!unitIsMoving)
+            {
+                //set unit position
+
+                unitManager.SelectNextUnit();
+                cantMoveMore = false;
+            }
+        }
+    }
+
     private void CalculateAIMovement()
     {        
         //Set position of unit
-        origPos = tileMap.WorldToCell(UnitManager.gameUnits[UnitManager.currUnitTurn].transform.position);
+        origPos = tileMap.WorldToCell(unitManager.gameUnits[unitManager.currUnitTurn].transform.position);
         //Set goal position
-        tilePos = tileMap.WorldToCell(UnitManager.gameUnits[AIUnitController.GetClosestEnemyUnitPosition()].transform.position);
+        tilePos = tileMap.WorldToCell(unitManager.gameUnits[unitManager.aiController.GetClosestEnemyUnit()].transform.position);
         //reset path finding 
         current = null;
         //calculate path
@@ -233,57 +269,99 @@ public class UnitMovement : MonoBehaviour
         unitIsMoving = true;
 
         // Move unit one tile at a time toward its destination via caculated path
+        
         foreach (Vector3Int position in path)
         {       
             //check each movement against available action points
-            if (UnitManager.actionPoints >= ((ATile)tileMap.GetTile(position)).movementCost)
+            if (unitManager.actionPoints >= ((ATile)tileMap.GetTile(position)).movementCost)
             {
-                //while unit is not at next tile, slide the unit to the next tile in path
-                while (objectToMove.transform.position != tileMap.GetCellCenterWorld(position))
+                bool isPlayerUnitOnTile = false;
+                bool isUnitOnTile = CheckUnitAtPosition(position, ref isPlayerUnitOnTile);
+                
+
+                //If there is no unit on the next tile, 
+                if (!isUnitOnTile)
+                { // Move the unit to that tile
+
+                    //while unit is not at the next tile, slide the unit to the next tile in path
+                    while (objectToMove.transform.position != tileMap.GetCellCenterWorld(position))
+                    {
+                        // Smoothly move the unit to next point in path
+                        objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, tileMap.GetCellCenterWorld(position), visualMovementSpeed * Time.deltaTime);
+                        yield return new WaitForEndOfFrame();
+                    }
+
+                    //decrease the amount of available action points according to the movement cost of the tile
+                    unitManager.actionPoints -= ((ATile)tileMap.GetTile(position)).movementCost;
+                    
+
+                    yield return new WaitForSeconds(.1f);
+                }
+                else // there is a unit on tile, check unit and melee attack if an enemy unit, stop moving if player unit
                 {
-                    // Smoothly move the unit to next point in path
-                    objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, tileMap.GetCellCenterWorld(position), visualMovementSpeed * Time.deltaTime);
-                    yield return new WaitForEndOfFrame();
+                    Vector3 prevPos = objectToMove.transform.position;
+
+                    //Check if Unit on target tile is friendly unit
+                    BaseUnit unitOnTile = unitManager.GetUnitAtPosition(position);
+                    
+                    //apply a bassic attack movement and do damage to enemy unit
+
+                    //do a quick move halfway toward tile enemy unit is occupying
+                    while (objectToMove.transform.position != (tileMap.GetCellCenterWorld(position) + prevPos) / 2)
+                    {
+                        objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, (tileMap.GetCellCenterWorld(position) + prevPos)/2, (visualMovementSpeed * 3) * Time.deltaTime);
+                        yield return new WaitForEndOfFrame();
+                    }
+
+                    // apply damage (and effect) to unit
+                    unitOnTile.TakeDamage(objectToMove.GetComponent<BaseUnit>().baseAttack);
+
+                    // quickly move back 
+                    while (objectToMove.transform.position != prevPos)
+                    {
+                        objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, prevPos, (visualMovementSpeed * 3) * Time.deltaTime);
+                        yield return new WaitForEndOfFrame();
+                    }
+                    
+                    unitManager.actionPoints = 0;
+                    break;
                 }
 
-                //decrease the amount of available action points according to the movement cost of the tile
-                UnitManager.actionPoints -= ((ATile)tileMap.GetTile(position)).movementCost;
-                yield return new WaitForSeconds(.1f);
+                
+                UpdateUnitPositions();
             }
             else
             {
                 //if unit still has an action point available they can attack
-                if (!(UnitManager.actionPoints > 0))
-                {
-                    cantMoveMore = true;
-                }
-                // set the indicator that the unit is no longer moving
-                unitIsMoving = false;
-                
+                cantMoveMore = !(unitManager.actionPoints > 0);
+                /*
+                if (!(unitManager.actionPoints > 0))                
+                    cantMoveMore = true;                
+                else
+                    cantMoveMore = false;
+                */                
+                            
                 break;
             }
         }
+        
         //Check if still unit has action points to attack but can't move more to its destination
-        if (!(UnitManager.actionPoints > 0))
+        if (!(unitManager.actionPoints > 0))
         {
             cantMoveMore = true;
         }
-
-        //if (UnitManager.actionPoints <= 0 || !UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled)
-        //{
-        //    cantMoveMore = true;
-        //}
-
+               
         // set the indicator that the unit is no longer moving
         unitIsMoving = false;
     }
 
-        // Path Finding Code
 
+    // Path Finding Functions
     #region PathFinding
-        
 
-    private void Initialize()
+
+
+    private void Initialise()
     {
         // get  the original start position node
         current = GetNode(origPos);
@@ -304,53 +382,96 @@ public class UnitMovement : MonoBehaviour
 
     public void CalculatePath()
     {
-
+        // if current tile node is null
         if (current == null)
         {
-            Initialize();
+            // (re)initilise the path variables
+            Initialise();
         }
 
+        
         while (openList.Count > 0 && path == null)
         {
+            //get any adjacent tiles unit can move to from current tile
             List<TileNode> neighbours = FindNeighbours(current.Position);
-
-            //Debug.Log("neighbours: " + neighbours.Count);
-
+                       
+            //Check the neighbour tiles of current tile
             ExamineNeighbours(neighbours, current);
             UpdateCurrentTile(ref current);
             path = GeneratePath(current);
-
-            //DebugNeighbours(neighbours);
         }
 
+        
+    }
 
-        // show path on map for player to see
+
+    void ShowPathOnMap()
+    {
+        // Iterate through the calculated path and show path on map for player to see
         if (path != null)
         {
-            int tempAP = UnitManager.actionPoints;
+            int tempAP = unitManager.actionPoints;
             // iterate through path nodes and set the 'highlight' overlay grid nodes to highlight hex tile
+            int range = 0;
+            int nextTileMoveCost;
+            ATile nextTile;
+
             foreach (Vector3Int position in path)
             {
+                range++;
                 //check available action p[oints for unit against the movement cost of the next tile
-                int nextTileMoveCost = ((ATile)tileMap.GetTile(position)).movementCost;
-                //highlight path so player can see it on the map
+
+                nextTile = (ATile)tileMap.GetTile(position);
+                if (unitManager.gameUnits[unitManager.currUnitTurn].canFly)
+                    nextTileMoveCost = 1;
+                else
+                    nextTileMoveCost = nextTile.movementCost;
+
+                // ########################################  IF TIME PERMITS
+                // move this to a place where it only runs once and not for every tile in the path 
+                // will need to change how the neighbour tiles are checked and re-work attack system so unit still moves to neigbour tile if melee
+                // set the mouse pointer
+                bool playerUnitOnTile = false;
+                //Debug.Log("AP: " + tempAP + " | NextTile AP: " + nextTileMoveCost + " | isWalkable: " + nextTile.isWalkable + " | canFly: " + unitManager.gameUnits[unitManager.currUnitTurn].canFly + " | unit At Position " + CheckUnitAtPosition(position, ref playerUnitOnTile));
+
                 if (tempAP < nextTileMoveCost)
                 {
                     pointerChanger.SetCursor("Invalid");
                     break;
                 }
-                else 
+                else if (!unitManager.gameUnits[unitManager.currUnitTurn].canFly && !nextTile.isWalkable)
                 {
-                    highlightPathMap.SetTile(position, pathTile);
-                    pointerChanger.SetCursor("Move");
+                    pointerChanger.SetCursor("Invalid");
+                    break;
                 }
+                else if (CheckUnitAtPosition(position, ref playerUnitOnTile))
+                {
+                    //Debug.Log("Unit is at mouse position");
+                    // check if unit is a player unit
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != playerUnitOnTile)
+                    { 
+                        if (unitManager.gameUnits[unitManager.currUnitTurn].baseAttackRange >= range)
+                            pointerChanger.SetCursor("RangedAttack");
+                        else
+                            pointerChanger.SetCursor("MeleeAttack");
+                    }
+                    else
+                    {
+                        pointerChanger.SetCursor("Invalid");
+                    }
+                    break;
+                }
+                else
+                {                    
+                    highlightPathMap.SetTile(position, pathTile);
+                    pointerChanger.SetCursor("Move");                    
+                    //break;
+                } 
 
                 tempAP -= nextTileMoveCost;
             }
         }
-        //else return null;
     }
-
 
 
     void DebugNeighbours(List<TileNode> neighbours)
@@ -377,95 +498,198 @@ public class UnitMovement : MonoBehaviour
         }
 
         ATile tempTile;
-        
+        Vector3Int tempPosition;
+        bool isPlayerUnit = false;
+        bool unitOnTile = false;
 
-        //RIGHT Get the Tile to the right of current tile and add to neighbour  list if a viable tile
-        tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x + 1, tilePosition.y, 0));
-
+        //RIGHT TILE: Get the Tile to the right of current tile and add to neighbour  list if a viable tile
+        tempPosition = new Vector3Int(tilePosition.x + 1, tilePosition.y, 0);
+        tempTile = (ATile)tileMap.GetTile(tempPosition);
+        unitOnTile = CheckUnitAtPosition(tempPosition, ref isPlayerUnit);
         //Check if there is a tile there
         if (tempTile != null)
         {
             // check if tile is walkable or the current unit can fly
-            if (tempTile.isWalkable || UnitManager.gameUnits[UnitManager.currUnitTurn].canFly)
+            if (tempTile.isWalkable || unitManager.gameUnits[unitManager.currUnitTurn].canFly)
             {
-                //add tile to our viable neighbour tile list
-                TileNode neighbour = GetNode(new Vector3Int(tilePosition.x + 1, tilePosition.y, 0));
-                neighbours.Add(neighbour);
+                //check if unit is on the tile
+                if (unitOnTile)
+                {
+                    // if unit is not same side then add tile to list (can be attacked)
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
+                    {
+                        //add tile to our viable neighbour tile list
+                        TileNode neighbour = GetNode(tempPosition);
+                        neighbours.Add(neighbour);
+                    }
+                }
+                else
+                {
+                    //add tile to our viable neighbour tile list
+                    TileNode neighbour = GetNode(tempPosition);
+                    neighbours.Add(neighbour);
+                }
             }
         }
 
-        //LEFT Get the Tile to the left of current tile and add to neighbour  list if a viable tile
-        tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x - 1, tilePosition.y, 0));
+        //LEFT TILE: Get the Tile to the left of current tile and add to neighbour  list if a viable tile        
+        tempPosition = new Vector3Int(tilePosition.x - 1, tilePosition.y, 0);
+        tempTile = (ATile)tileMap.GetTile(tempPosition);
+        unitOnTile = CheckUnitAtPosition(tempPosition, ref isPlayerUnit);
         //Check if there is a tile there
         if (tempTile != null)
         {
             // check if tile is walkable or the current unit can fly
-            if (tempTile.isWalkable || UnitManager.gameUnits[UnitManager.currUnitTurn].canFly)
+            if (tempTile.isWalkable || unitManager.gameUnits[unitManager.currUnitTurn].canFly)
             {
-                //add tile to our viable neighbour tile list
-                TileNode neighbour = GetNode(new Vector3Int(tilePosition.x - 1, tilePosition.y, 0));
-                neighbours.Add(neighbour);
+                //check if unit is on the tile
+                if (unitOnTile)
+                {
+                    // if unit is not same side then add tile to list as the tile can be attacked
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
+                    {
+                        //add tile to our viable neighbour tile list
+                        TileNode neighbour = GetNode(tempPosition);
+                        neighbours.Add(neighbour);
+                    }                    
+                }
+                else
+                {
+                    //add tile to our viable neighbour tile list
+                    TileNode neighbour = GetNode(tempPosition);
+                    neighbours.Add(neighbour);
+                }
             }
         }
 
 
-        //UPRIGHT Get the Tile up and to the right of current tile and add to neighbour list if a viable tile
-        tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x + hexTileOffset, tilePosition.y + 1, 0));
+        //UPRIGHT TILE: Get the Tile up and to the right of current tile and add to neighbour list if a viable tile
+        tempPosition = new Vector3Int(tilePosition.x + hexTileOffset, tilePosition.y + 1, 0);
+        tempTile = (ATile)tileMap.GetTile(tempPosition);
+        unitOnTile = CheckUnitAtPosition(tempPosition, ref isPlayerUnit);
         //Check if there is a tile there
         if (tempTile != null)
         {
            // check if tile is walkable or the current unit can fly 
-            if (tempTile.isWalkable || UnitManager.gameUnits[UnitManager.currUnitTurn].canFly)
+            if (tempTile.isWalkable || unitManager.gameUnits[unitManager.currUnitTurn].canFly)
             {
-                //add tile to our viable neighbour tile list
-                TileNode neighbour = GetNode(new Vector3Int(tilePosition.x + hexTileOffset, tilePosition.y + 1, 0));
-                neighbours.Add(neighbour);
+                //check if unit is on the tile
+                if (unitOnTile)
+                {
+                    Debug.Log("UP RIGHT HAS UNIT");
+                    // if unit is not same side then add tile to list as the tile can be attacked
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
+                    {
+                        Debug.Log("UP RIGHT UNIT IS ENEMY");
+                        //add tile to our viable neighbour tile list
+                        TileNode neighbour = GetNode(tempPosition);
+                        neighbours.Add(neighbour);
+                    }
+                    else 
+                        Debug.Log("UP RIGHT UNIT NOT ENEMY");
+                }
+                else
+                {
+                    //add tile to our viable neighbour tile list
+                    TileNode neighbour = GetNode(tempPosition);
+                    neighbours.Add(neighbour);
+                }
             }
         }
 
-        //UPLEFT Get the Tile up and to the left of current tile and add to neighbour list if a viable tile
-        tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x - 1 + hexTileOffset, tilePosition.y + 1, 0));
+        //UPLEFT TILE: Get the Tile up and to the left of current tile and add to neighbour list if a viable tile
+        tempPosition = new Vector3Int(tilePosition.x - 1 + hexTileOffset, tilePosition.y + 1, 0);
+        tempTile = (ATile)tileMap.GetTile(tempPosition);
+        unitOnTile = CheckUnitAtPosition(tempPosition, ref isPlayerUnit);
         //Check if there is a tile there
         if (tempTile != null)
-        {
+        {            
             // check if tile is walkable or the current unit can fly
-            if (tempTile.isWalkable || UnitManager.gameUnits[UnitManager.currUnitTurn].canFly)
+            if (tempTile.isWalkable || unitManager.gameUnits[unitManager.currUnitTurn].canFly)
             {
-                //add tile to our viable neighbour tile list
-                TileNode neighbour = GetNode(new Vector3Int(tilePosition.x - 1 + hexTileOffset, tilePosition.y + 1, 0));
-                neighbours.Add(neighbour);
+                //check if unit is on the tile
+                if (unitOnTile)
+                {
+                    // if unit is not same side then add tile to list as the tile can be attacked
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
+                    {
+                        //add tile to our viable neighbour tile list
+                        TileNode neighbour = GetNode(tempPosition);
+                        neighbours.Add(neighbour);
+                    }
+                }
+                else
+                {
+                    //add tile to our viable neighbour tile list
+                    TileNode neighbour = GetNode(tempPosition);
+                    neighbours.Add(neighbour);
+                }
             }
         }
-        
 
-        //DOWNLEFT Get the Tile up and to the right of current tile and add to neighbour list if a viable tile
-        tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x - 1 + hexTileOffset, tilePosition.y - 1, 0));
+
+        //DOWNLEFT TILE: Get the Tile up and to the right of current tile and add to neighbour list if a viable tile
+        tempPosition = new Vector3Int(tilePosition.x - 1 + hexTileOffset, tilePosition.y - 1, 0);
+        tempTile = (ATile)tileMap.GetTile(tilePosition);
+        unitOnTile = CheckUnitAtPosition(tempPosition, ref isPlayerUnit);
         //Check if there is a tile there
         if (tempTile != null)
         {
             // check if tile is walkable or the current unit can fly 
-            if (tempTile.isWalkable || UnitManager.gameUnits[UnitManager.currUnitTurn].canFly)
+            if (tempTile.isWalkable || unitManager.gameUnits[unitManager.currUnitTurn].canFly)
             {
-                //add tile to our viable neighbour tile list
-                TileNode neighbour = GetNode(new Vector3Int(tilePosition.x - 1 + hexTileOffset, tilePosition.y - 1, 0));
-                neighbours.Add(neighbour);
+                //check if unit is on the tile
+                if (unitOnTile)
+                {
+                    // if unit is not same side then add tile to list as the tile can be attacked
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
+                    {
+                        //add tile to our viable neighbour tile list
+                        TileNode neighbour = GetNode(tempPosition);
+                        neighbours.Add(neighbour);
+                    }
+                }
+                else
+                {
+                    //add tile to our viable neighbour tile list
+                    TileNode neighbour = GetNode(tempPosition);
+                    neighbours.Add(neighbour);
+                }
             }
         }
 
-        //DOWNRIGHT Get the Tile up and to the left of current tile and add to neighbour list if a viable tile
-        tempTile = (ATile)tileMap.GetTile(new Vector3Int(tilePosition.x + hexTileOffset, tilePosition.y - 1, 0));
+        //DOWNRIGHT TILE: Get the Tile up and to the left of current tile and add to neighbour list if a viable tile
+        tempPosition = new Vector3Int(tilePosition.x + hexTileOffset, tilePosition.y - 1, 0);
+        tempTile = (ATile)tileMap.GetTile(tempPosition);
+        unitOnTile = CheckUnitAtPosition(tempPosition, ref isPlayerUnit);
         //Check if there is a tile there
         if (tempTile != null)
         {
             // check if tile is walkable or the current unit can fly
-            if (tempTile.isWalkable || UnitManager.gameUnits[UnitManager.currUnitTurn].canFly)
+            if (tempTile.isWalkable || unitManager.gameUnits[unitManager.currUnitTurn].canFly)
             {
-                //add tile to our viable neighbour tile list
-                TileNode neighbour = GetNode(new Vector3Int(tilePosition.x + hexTileOffset, tilePosition.y - 1, 0));
-                neighbours.Add(neighbour);
+                //check if unit is on the tile
+                if (unitOnTile)
+                {
+                    // if unit is not same side then add tile to list as the tile can be attacked
+                    if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
+                    {
+                        //add tile to our viable neighbour tile list
+                        TileNode neighbour = GetNode(tempPosition);
+                        neighbours.Add(neighbour);
+                    }
+                }
+                else
+                {
+                    //add tile to our viable neighbour tile list
+                    TileNode neighbour = GetNode(tempPosition);
+                    neighbours.Add(neighbour);
+                }
             }
-        }        
+        }
 
+        //Debug.Log("From Tile: " + tilePosition);
+        //DebugNeighbours(neighbours);
         return neighbours;
     }
 

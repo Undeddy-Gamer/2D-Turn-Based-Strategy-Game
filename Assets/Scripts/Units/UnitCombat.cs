@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Combat : MonoBehaviour
-
-    
+public class UnitCombat : MonoBehaviour    
 {
-    public UnitMovement um;
+    public UnitMovement unitMovement;
 
     //game object refers to both the attacker and the defendor
 
@@ -20,14 +18,14 @@ public class Combat : MonoBehaviour
         
     }
 
-    public void MeleeAttack()
+    public void MeleeAttack(ref GameObject AttactingUnit, ref GameObject RecievingUnit)
     {
+        // do combat animation
 
+        // calculate damages applied
+
+        // apply damage
     }
 
 
-    //public ATile[] CheckUnitAdacent()
-    //{
-        
-    //}
 }

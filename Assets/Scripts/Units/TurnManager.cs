@@ -11,19 +11,11 @@ public class TurnManager : MonoBehaviour
 
     public static float TurnEnds = 1;
     public static bool PlayerTurn;
-    public Image button;
+    public Button nextTurnButton;
 
     public UnitManager unitManager;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        if (UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled)
-            PlayerTurn = true;
-        else
-            PlayerTurn = false;
-    }
-    
+        
     public void NextTurn()
     {
         Debug.Log("END TURN CLICKED");        
@@ -31,36 +23,27 @@ public class TurnManager : MonoBehaviour
         turnNumber += 1;
         TurnEnds += 1;
 
-        //UnitManager manages player turn bool
-        unitManager.SelectNextUnit();
-        
+        //unitManager manages player turn bool
+        unitManager.SelectNextUnit();        
     }
 
 
     void Update()
     {
-
-
-        PlayerTurn = UnitManager.gameUnits[UnitManager.currUnitTurn].playerControlled;
+        PlayerTurn = unitManager.gameUnits[unitManager.currUnitTurn].playerControlled;
 
         if (PlayerTurn)
         {
             whosTurnIsitAnyway = "Player";
-            button.color = Color.blue;
+            nextTurnButton.image.color = Color.blue;
         }
         else
         {
             whosTurnIsitAnyway = "Enemy";
-            button.color = Color.red;
+            nextTurnButton.image.color = Color.red;
         }
 
         turnText.text = whosTurnIsitAnyway + "'s Turn: " + turnNumber;
 
-
-        // Eddie asks What is this for below?        
-        //if (TurnEnds >= 0)
-        //{
-        //    TurnEnds -= Time.deltaTime;
-        //}
     }
 }

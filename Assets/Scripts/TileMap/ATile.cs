@@ -12,5 +12,8 @@ public class ATile : Tile
     public bool isWalkable = true;
     [SerializeField]
     public int damagePerTurn = 0;
+    [SerializeField]
+    public bool pulse = false;
+    
 }
 

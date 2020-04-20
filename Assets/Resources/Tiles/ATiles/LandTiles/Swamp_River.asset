@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: bd803f7e81cadc84b8f6f1be6c6857d9, type: 3}
   m_Name: Swamp_River
   m_EditorClassIdentifier: Assembly-CSharp::ATile
   m_Sprite: {fileID: 21300000, guid: 6d4ba5f1e2d6d2b4687193b88e31bea0, type: 3}
@@ -35,5 +35,5 @@ MonoBehaviour:
   m_Flags: 1
   m_ColliderType: 1
   movementCost: 1
-  isWalkable: 0
+  isWalkable: 1
   damagePerTurn: 0

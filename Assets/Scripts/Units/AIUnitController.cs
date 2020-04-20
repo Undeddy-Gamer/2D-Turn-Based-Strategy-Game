@@ -5,23 +5,24 @@ using UnityEngine;
 public class AIUnitController : MonoBehaviour
 {
        
-    public TurnManager turn;
+    public UnitManager unitManager;
 
-    bool canAttack = false;
+    //bool canAttack = false;
+
     
-    public static void CalculateAITurn()
+    public void CalculateAITurn()
     {
         
         
     }
 
-    public static int GetClosestEnemyUnitPosition()
+    public int GetClosestEnemyUnit()
     {
         int unitToAttack = -1;
 
-        for (int i = 0; i < UnitManager.gameUnits.Count - 1; i++)
+        for (int i = 0; i < unitManager.gameUnits.Count - 1; i++)
         {
-            if (UnitManager.gameUnits[i].playerControlled)
+            if (unitManager.gameUnits[i].playerControlled)
             {
                 unitToAttack = i;
                 //break;
