@@ -14,7 +14,10 @@ public class UnitManager : MonoBehaviour
     private float prevHealth = 0;
 
     [Space(5), Header("UI References")]
-    public Text unitStats;
+    public Text unitHealth;
+    public Text unitAP;
+    public Text unitRange;
+    public Text unitDamage;
     public Image unitIcon;
 
     [Space(5), Header("Manager References")]
@@ -28,7 +31,7 @@ public class UnitManager : MonoBehaviour
 
     
 
-    void Start()
+    void Awake()
     {
         //place Units?
 
@@ -117,7 +120,12 @@ public class UnitManager : MonoBehaviour
     private void UpdateUnitUI()
     {
         unitIcon.sprite = gameUnits[currUnitTurn].transform.GetComponent<SpriteRenderer>().sprite;
-        unitStats.text = "A/P: " + actionPoints + "\nHealth: " + gameUnits[currUnitTurn].currentHealth + "\nDamage: " + gameUnits[currUnitTurn].baseAttack;
+        //unitStats.text = "A/P: " + actionPoints + "\nHealth: " + gameUnits[currUnitTurn].currentHealth + "\nDamage: " + gameUnits[currUnitTurn].baseAttack + "\nRange: " + gameUnits[currUnitTurn].baseAttackRange;
+        unitHealth.text = ": " + gameUnits[currUnitTurn].currentHealth;
+        unitAP.text = ": " + actionPoints;
+        unitDamage.text = ": " + gameUnits[currUnitTurn].baseAttack;
+        unitRange.text = ": " + gameUnits[currUnitTurn].baseAttackRange;
+
         prevAP = actionPoints;
         prevHealth = gameUnits[currUnitTurn].currentHealth;
     }

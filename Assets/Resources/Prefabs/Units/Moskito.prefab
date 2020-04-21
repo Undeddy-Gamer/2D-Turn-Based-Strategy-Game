@@ -52,7 +52,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d2cb3ce432e66e5448edebf6ff655092, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -112,16 +112,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 316136e48e23ad04ca52536a048bf41d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseHealth: 3
-  baseMovementSpeed: 8
-  baseAttack: 4
-  baseAttackRange: 1
-  baseInitiation: 6
+  baseHealth: 2
+  baseMovementSpeed: 4
+  baseAttack: 2
+  baseAttackRange: 3
+  baseInitiation: 3
   canFly: 0
   attackSpeed: 5
   dying: 10
   skin: {fileID: 2100000, guid: d2cb3ce432e66e5448edebf6ff655092, type: 2}
-  currentHealth: 5
+  currentHealth: 2
   currentTilePosition: {x: 0, y: 0, z: 0}
   active: 0
   playerControlled: 1

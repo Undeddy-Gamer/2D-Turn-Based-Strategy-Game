@@ -113,8 +113,6 @@ public class UnitMovement : MonoBehaviour
                 highlightUnitMap.SetTile(item.currentTilePosition, playerTile);
             else
                 highlightUnitMap.SetTile(item.currentTilePosition, enemyTile);
-
-
         }
     }
 
@@ -136,7 +134,6 @@ public class UnitMovement : MonoBehaviour
             }
             //Debug.Log("Unit Position: " + tileMap.WorldToCell(item.transform.position) + " | Check Position: " + checkPosition);
         }
-
         return occupied;
     }
 
@@ -293,8 +290,8 @@ public class UnitMovement : MonoBehaviour
 
                     //decrease the amount of available action points according to the movement cost of the tile
                     unitManager.actionPoints -= ((ATile)tileMap.GetTile(position)).movementCost;
-                    
 
+                    UpdateUnitPositions();
                     yield return new WaitForSeconds(.1f);
                 }
                 else // there is a unit on tile, check unit and melee attack if an enemy unit, stop moving if player unit
@@ -324,25 +321,20 @@ public class UnitMovement : MonoBehaviour
                     }
                     
                     unitManager.actionPoints = 0;
-                    break;
+                    
                 }
 
                 
-                UpdateUnitPositions();
+                
             }
             else
             {
                 //if unit still has an action point available they can attack
                 cantMoveMore = !(unitManager.actionPoints > 0);
-                /*
-                if (!(unitManager.actionPoints > 0))                
-                    cantMoveMore = true;                
-                else
-                    cantMoveMore = false;
-                */                
-                            
+                                            
                 break;
             }
+
         }
         
         //Check if still unit has action points to attack but can't move more to its destination
@@ -575,18 +567,14 @@ public class UnitMovement : MonoBehaviour
             {
                 //check if unit is on the tile
                 if (unitOnTile)
-                {
-                    Debug.Log("UP RIGHT HAS UNIT");
+                {                    
                     // if unit is not same side then add tile to list as the tile can be attacked
                     if (unitManager.gameUnits[unitManager.currUnitTurn].playerControlled != isPlayerUnit)
-                    {
-                        Debug.Log("UP RIGHT UNIT IS ENEMY");
+                    {                 
                         //add tile to our viable neighbour tile list
                         TileNode neighbour = GetNode(tempPosition);
                         neighbours.Add(neighbour);
-                    }
-                    else 
-                        Debug.Log("UP RIGHT UNIT NOT ENEMY");
+                    }                    
                 }
                 else
                 {
