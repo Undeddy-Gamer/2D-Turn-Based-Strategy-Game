@@ -1687,6 +1687,36 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 741629919}
     m_Modifications:
+    - target: {fileID: 5260767444087441479, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5260767444087441479, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5260767444087441479, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5260767444202780355, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 75
+      objectReference: {fileID: 0}
+    - target: {fileID: 5260767444231788752, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5260767444231788752, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5260767444335824262, guid: 40993706b6af0134a9144eec1f5863e6,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -1811,6 +1841,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: OptionsPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 5260767444736303646, guid: 40993706b6af0134a9144eec1f5863e6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5260767444948402095, guid: 40993706b6af0134a9144eec1f5863e6,
         type: 3}
